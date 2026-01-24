@@ -33,19 +33,33 @@ npx supabase start
 ```
 
 ### 4. Database Migrations (CRITICAL)
-If you are setting up for the first time or pulling changes, **you must apply migrations**:
+A modern client portal and management system.
+
+## 🔗 Links
+
+- **Live Demo:** [https://app.lopes2tech.ch](https://app.lopes2tech.ch)
+- **Repository:** [https://github.com/lordrichard6/lopes2tech_platform](https://github.com/lordrichard6/lopes2tech_platform)
+
+## 🛠️ Tech Stack
+
+- [Next.js](https://nextjs.org) - React Framework
+- TypeScript
+- CSS Modules
+- Supabase
+- Stripe
+
+## 🚀 Getting Started
 
 ```bash
-npx supabase migration up
-```
-
-> **Warning**: Do NOT use `npx supabase db reset` unless you want to delete all local data. `migration up` is the safe command to apply new schema changes.
-
-### 5. Start the App
-```bash
+npm install
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000).
+
+Open [http://localhost:3000](http://localhost:3000) with your browser.
+
+## 📄 License
+
+This project is proprietary and created by Lopes2Tech.
 
 ---
 
