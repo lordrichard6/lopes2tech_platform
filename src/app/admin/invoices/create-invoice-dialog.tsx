@@ -47,10 +47,11 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>
 
 interface CreateInvoiceDialogProps {
+    children?: React.ReactNode;
     onSuccess?: () => void;
 }
 
-export function CreateInvoiceDialog({ onSuccess }: CreateInvoiceDialogProps) {
+export function CreateInvoiceDialog({ children, onSuccess }: CreateInvoiceDialogProps) {
     const [open, setOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [clients, setClients] = useState<Array<{ id: string; name: string }>>([])
@@ -119,10 +120,12 @@ export function CreateInvoiceDialog({ onSuccess }: CreateInvoiceDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Invoice
-                </Button>
+                {children || (
+                    <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Invoice
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>

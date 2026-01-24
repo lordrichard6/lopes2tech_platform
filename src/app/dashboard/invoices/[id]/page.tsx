@@ -239,7 +239,7 @@ export default async function InvoiceDetailsPage({ params }: { params: Promise<{
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>{t.invoices.details.installment}</TableHead>
-                                            <TableHead>{t.invoices.details.issueDate}</TableHead> {/* Should be Due Date? Yes usually due date. Using issueDate might be wrong key. Wait, previous replacement used 'Due Date'. Let's check dictionary again. I added 'issueDate' but not 'dueDate' in 'details' block, but I have 'invoices.due'. I will use 't.invoices.due'. */}
+                                            <TableHead>{t.invoices.due}</TableHead>
                                             <TableHead>{t.invoices.details.amount}</TableHead>
                                             <TableHead>{t.projects.status}</TableHead>
                                             <TableHead className="text-right">{t.invoices.details.action}</TableHead>

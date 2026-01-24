@@ -24,14 +24,14 @@ export function Sidebar({ links, bottomLinks }: SidebarProps) {
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300 ease-in-out flex flex-col",
+                "fixed left-0 top-0 z-40 h-[100dvh] bg-card border-r transition-all duration-300 ease-in-out flex flex-col",
                 isHovered ? "w-64" : "w-16"
             )}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <div className={cn(
-                "flex h-14 items-center justify-center border-b px-4",
+                "flex h-14 items-center justify-center border-b px-4 shrink-0",
                 isHovered ? "justify-start" : "justify-center"
             )}>
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-cyan-500/20">
@@ -47,7 +47,7 @@ export function Sidebar({ links, bottomLinks }: SidebarProps) {
                 </span>
             </div>
 
-            <nav className="flex-1 flex flex-col gap-2 p-2">
+            <nav className="flex-1 flex flex-col gap-2 p-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 scrollbar-track-transparent">
                 {links.map((link) => {
                     const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
                     return (

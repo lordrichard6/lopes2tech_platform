@@ -38,6 +38,21 @@ export function AdminPasswordForm() {
         },
     })
 
+    const generatePassword = () => {
+        const length = 16;
+        const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+        let newPassword = "";
+        for (let i = 0, n = charset.length; i < length; ++i) {
+            newPassword += charset.charAt(Math.floor(Math.random() * n));
+        }
+
+        form.setValue("password", newPassword);
+        form.setValue("confirmPassword", newPassword);
+
+        navigator.clipboard.writeText(newPassword);
+        toast.success("Strong password generated and copied!");
+    }
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const formData = new FormData()
         formData.append('password', values.password)
@@ -63,9 +78,19 @@ export function AdminPasswordForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                                <Input type="password" placeholder="******" {...field} />
-                            </FormControl>
+                            <div className="flex gap-2">
+                                <FormControl>
+                                    <Input type="text" placeholder="******" {...field} />
+                                </FormControl>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={generatePassword}
+                                    title="Generate Strong Password"
+                                >
+                                    Generate
+                                </Button>
+                            </div>
                             <FormDescription>
                                 Enter your new password.
                             </FormDescription>

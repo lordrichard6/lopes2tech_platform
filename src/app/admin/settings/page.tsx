@@ -11,6 +11,7 @@ import { NotificationSettingsForm } from "./notification-settings-form"
 import { SystemConfigForm } from "./system-config-form"
 import { TeamList } from "./team-list"
 
+
 export default async function AdminSettingsPage() {
     const supabase = await createClient()
 
@@ -136,6 +137,8 @@ export default async function AdminSettingsPage() {
                                     <NotificationSettingsForm settings={systemSettings || {}} />
                                 </CardContent>
                             </Card>
+
+
 
                             <Card className="border-red-200 dark:border-red-900/50">
                                 <CardHeader>

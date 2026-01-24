@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { generateQRBill } from '@/lib/pdf/generate-qr-bill-server';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -10,9 +11,17 @@ export async function GET(
 
     try {
         const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            return new NextResponse('Unauthorized', { status: 401 });
+        }
+
+        // Use Admin Client to bypass RLS for data fetching, then verify ownership
+        const adminDb = createAdminClient();
 
         // 1. Fetch Schedule with Invoice and Client data
-        const { data: schedule, error } = await supabase
+        const { data: schedule, error } = await adminDb
             .from('invoice_payment_schedules')
             .select(`
                 *,
@@ -30,16 +39,25 @@ export async function GET(
             return new NextResponse('Schedule not found', { status: 404 });
         }
 
-        // Fetch System Settings for IBAN
-        const { data: settings } = await supabase
+        const invoice = schedule.invoices;
+        const client = invoice.clients;
+
+        // 2. Security Check (Ownership)
+        const isOwner = client.user_id === user.id ||
+            (client.contact_email && client.contact_email.toLowerCase() === user.email?.toLowerCase());
+
+        if (!isOwner) {
+            console.error(`Unauthorized QR access by ${user.email} for schedule ${scheduleId}`);
+            return new NextResponse('Unauthorized', { status: 403 });
+        }
+
+        // Fetch System Settings (usually public or admin, use adminDb to be safe)
+        const { data: settings } = await adminDb
             .from('system_settings')
             .select('*')
             .single();
 
-        const invoice = schedule.invoices;
-        const client = invoice.clients;
-
-        // 2. Generate QR PDF
+        // 3. Generate QR PDF
         const pdfBuffer = await generateQRBill({
             amount: schedule.amount,
             currency: invoice.currency,
@@ -62,8 +80,7 @@ export async function GET(
             message: `Installment #${schedule.installment_number} for Invoice ${invoice.description || invoice.id}`,
         });
 
-        // 3. Return PDF
-        // Wrap Buffer in Blob to satisfy Response body type
+        // 4. Return PDF
         const pdfBlob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
 
         return new NextResponse(pdfBlob, {
