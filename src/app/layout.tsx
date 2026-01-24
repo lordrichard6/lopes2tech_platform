@@ -43,11 +43,6 @@ export const metadata: Metadata = {
     images: ["/logo.png"],
     creator: "@lopes2tech",
   },
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-  },
   manifest: "/manifest.json",
 };
 
