@@ -1,8 +1,85 @@
 'use server'
-
+import { sendPaymentConfirmedEmail } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+
+export async function confirmPaymentAction(scheduleId: string, invoiceId: string) {
+    const supabase = await createClient()
+
+    // 1. Get schedule and client details for email BEFORE update (to ensure we have data)
+    const { data: schedule } = await supabase
+        .from('invoice_payment_schedules')
+        .select(`
+            *,
+            invoice:invoices (
+                invoice_number,
+                currency,
+                clients (
+                    contact_email
+                )
+            )
+        `)
+        .eq('id', scheduleId)
+        .single()
+
+    if (!schedule) return { error: 'Schedule not found' }
+
+    // 2. Update schedule status
+    const { error: updateError } = await supabase
+        .from('invoice_payment_schedules')
+        .update({
+            status: 'paid',
+            paid_at: new Date().toISOString()
+        })
+        .eq('id', scheduleId)
+
+    if (updateError) return { error: updateError.message }
+
+    // 3. Insert payment history
+    const { error: insertError } = await supabase
+        .from('invoice_payments')
+        .insert({
+            invoice_id: invoiceId,
+            amount: schedule.amount,
+            payment_date: new Date().toISOString(),
+            payment_method: 'bank_transfer',
+            reference: schedule.qr_reference || `Installment ${schedule.installment_number}`,
+            notes: `Manual confirmation for installment #${schedule.installment_number}`
+        })
+
+    if (insertError) console.error("Failed to record history:", insertError)
+
+    // 4. Sync invoice total (re-using logic from original component, but server-side)
+    const { data: payments } = await supabase
+        .from('invoice_payments')
+        .select('amount')
+        .eq('invoice_id', invoiceId)
+
+    const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+    const { data: invoice } = await supabase.from('invoices').select('amount').eq('id', invoiceId).single()
+
+    await supabase.from('invoices').update({
+        amount_paid: totalPaid,
+        status: totalPaid >= (invoice?.amount || 0) ? 'paid' : 'partial'
+    }).eq('id', invoiceId)
+
+
+    // 5. Send Email to Client
+    const clientEmail = schedule.invoice?.clients?.contact_email
+    if (clientEmail) {
+        await sendPaymentConfirmedEmail(clientEmail, {
+            invoiceNumber: schedule.invoice.invoice_number || 'N/A',
+            installmentNumber: schedule.installment_number,
+            amount: schedule.amount.toFixed(2),
+            currency: schedule.invoice.currency
+        })
+    }
+
+    revalidatePath('/admin/invoices')
+    return { success: true }
+}
+
 
 export async function createInvoiceAction(formData: FormData) {
     const supabase = await createClient()

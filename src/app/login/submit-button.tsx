@@ -3,7 +3,11 @@
 import { useFormStatus } from 'react-dom'
 import { Loader2, ArrowRight } from "lucide-react"
 
-export function SubmitButton() {
+interface SubmitButtonProps {
+    label?: string;
+}
+
+export function SubmitButton({ label = "Sign In" }: SubmitButtonProps) {
     const { pending } = useFormStatus()
 
     return (
@@ -23,11 +27,11 @@ export function SubmitButton() {
                 {pending ? (
                     <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Signing In...</span>
+                        <span>{label}...</span>
                     </>
                 ) : (
                     <>
-                        <span>Sign In</span>
+                        <span>{label}</span>
                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </>
                 )}

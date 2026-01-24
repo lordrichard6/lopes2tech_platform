@@ -34,3 +34,20 @@ export async function sendEmail({ to, subject, html }: SendEmailProps) {
         return { success: false, error: (error as Error).message || "Unknown email error" };
     }
 }
+import { getPaymentProcessingEmailHtml, getPaymentConfirmedEmailHtml } from './email-templates';
+
+export async function sendPaymentProcessingEmail(to: string, data: { invoiceNumber: string, installmentNumber: number, amount: string, currency: string }) {
+    return sendEmail({
+        to,
+        subject: `Payment Verification: Invoice #${data.invoiceNumber} (Installment #${data.installmentNumber})`,
+        html: getPaymentProcessingEmailHtml(data.invoiceNumber, data.installmentNumber, data.amount, data.currency)
+    });
+}
+
+export async function sendPaymentConfirmedEmail(to: string, data: { invoiceNumber: string, installmentNumber: number, amount: string, currency: string }) {
+    return sendEmail({
+        to,
+        subject: `Payment Received: Invoice #${data.invoiceNumber}`,
+        html: getPaymentConfirmedEmailHtml(data.invoiceNumber, data.installmentNumber, data.amount, data.currency)
+    });
+}

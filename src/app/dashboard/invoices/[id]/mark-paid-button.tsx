@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/language-context";
+import { markScheduleProcessingAction } from "../actions";
 
 interface MarkPaidButtonProps {
     scheduleId: string;
@@ -22,20 +23,15 @@ export function MarkPaidButton({ scheduleId, status }: MarkPaidButtonProps) {
     const handleMarkPaid = async () => {
         setIsLoading(true);
         try {
-            const supabase = createClient();
+            const result = await markScheduleProcessingAction(scheduleId);
 
-            const { error } = await supabase
-                .from('invoice_payment_schedules')
-                .update({ status: 'processing' })
-                .eq('id', scheduleId);
-
-            if (error) throw error;
+            if (result.error) throw new Error(result.error);
 
             toast.success('Payment marked as processing. Waiting for admin approval.');
             router.refresh();
-        } catch (error: unknown) {
+        } catch (error: any) {
             console.error('Error marking as paid:', error);
-            toast.error('Failed to update status. Please try again.');
+            toast.error(error.message || 'Failed to update status. Please try again.');
         } finally {
             setIsLoading(false);
         }

@@ -12,6 +12,7 @@ import { generateSwissQRBase64 } from "@/lib/pdf/generate-qr-bill";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { confirmPaymentAction } from "@/app/admin/invoices/actions";
 
 interface PaymentScheduleTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -133,48 +134,14 @@ export function PaymentScheduleTable({ schedules, invoice, settings }: PaymentSc
         try {
             setUpdatingId(scheduleId);
 
-            // 1. Update schedule status
-            const { error: updateError } = await supabase
-                .from('invoice_payment_schedules')
-                .update({
-                    status: 'paid',
-                    paid_at: new Date().toISOString()
-                })
-                .eq('id', scheduleId);
+            const result = await confirmPaymentAction(scheduleId, invoice.id);
+            if (result.error) throw new Error(result.error);
 
-            if (updateError) throw updateError;
-
-            // 2. Find the schedule details to record accurate history
-            const schedule = schedules.find(s => s.id === scheduleId);
-            if (schedule) {
-                const { error: insertError } = await supabase
-                    .from('invoice_payments')
-                    .insert({
-                        invoice_id: invoice.id,
-                        amount: schedule.amount,
-                        payment_date: new Date().toISOString(),
-                        payment_method: 'bank_transfer',
-                        reference: schedule.qr_reference || `Installment ${schedule.installment_number}`,
-                        notes: `Manual payment for installment #${schedule.installment_number}`
-                    });
-
-                if (insertError) {
-                    console.error("Failed to record payment history:", insertError);
-                    toast.warning("Schedule updated but payment history failed to record");
-                } else {
-                    toast.success("Marked as paid and recorded in history");
-                }
-
-                // Sync invoice total
-                await syncInvoiceTotal(invoice.id);
-            } else {
-                toast.success("Marked as paid");
-            }
-
+            toast.success("Marked as paid and recorded in history");
             router.refresh();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Update Error:", error);
-            toast.error("Failed to update status");
+            toast.error(error.message || "Failed to update status");
         } finally {
             setUpdatingId(null);
         }

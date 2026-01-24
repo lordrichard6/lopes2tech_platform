@@ -125,10 +125,32 @@ export type Dictionary = {
             success: string;
         };
     };
+    auth: {
+        title: string;
+        subtitle: string;
+        email: string;
+        password: string;
+        login: string;
+        forgotPassword: string;
+        contactSupport: string;
+        needHelp: string;
+        footer: string;
+    };
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
     en: {
+        auth: {
+            title: "Welcome to my office",
+            subtitle: "Enter your credentials to access your account",
+            email: "Email",
+            password: "Password",
+            login: "Sign in",
+            forgotPassword: "Forgot password?",
+            contactSupport: "Contact Support",
+            needHelp: "Need help?",
+            footer: "Lopes2Tech. All rights reserved.",
+        },
         dashboard: {
             welcome: "Welcome back",
             activeProjects: "Active Projects",
@@ -255,6 +277,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
         },
     },
     pt: {
+        auth: {
+            title: "Bem-vindo ao meu escritório",
+            subtitle: "Insira suas credenciais para acessar sua conta",
+            email: "E-mail",
+            password: "Senha",
+            login: "Entrar",
+            forgotPassword: "Esqueceu a senha?",
+            contactSupport: "Contatar Suporte",
+            needHelp: "Precisa de ajuda?",
+            footer: "Lopes2Tech. Todos os direitos reservados.",
+        },
         dashboard: {
             welcome: "Bem-vindo de volta",
             activeProjects: "Projetos Ativos",
@@ -381,6 +414,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
         },
     },
     de: {
+        auth: {
+            title: "Willkommen in meinem Büro",
+            subtitle: "Geben Sie Ihre Anmeldedaten ein, um auf Ihr Konto zuzugreifen",
+            email: "E-Mail",
+            password: "Passwort",
+            login: "Anmelden",
+            forgotPassword: "Passwort vergessen?",
+            contactSupport: "Support kontaktieren",
+            needHelp: "Brauchen Sie Hilfe?",
+            footer: "Lopes2Tech. Alle Rechte vorbehalten.",
+        },
         dashboard: {
             welcome: "Willkommen zurück",
             activeProjects: "Aktive Projekte",
