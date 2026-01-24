@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { dictionaries, Locale } from "@/lib/i18n/dictionaries";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Separator } from "@/components/ui/separator";

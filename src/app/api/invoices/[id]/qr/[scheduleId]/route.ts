@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { generateQRBill } from '@/lib/pdf/generate-qr-bill';
+import { generateQRBill } from '@/lib/pdf/generate-qr-bill-server';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -30,6 +30,12 @@ export async function GET(
             return new NextResponse('Schedule not found', { status: 404 });
         }
 
+        // Fetch System Settings for IBAN
+        const { data: settings } = await supabase
+            .from('system_settings')
+            .select('*')
+            .single();
+
         const invoice = schedule.invoices;
         // @ts-ignore
         const client = invoice.clients;
@@ -39,6 +45,14 @@ export async function GET(
             amount: schedule.amount,
             currency: invoice.currency,
             reference: schedule.qr_reference,
+            creditor: {
+                name: settings?.account_holder || 'Lopes2Tech',
+                account: settings?.qr_iban || settings?.iban || '', // Required field
+                address: settings?.creditor_street || 'Musterstrasse 1',
+                zip: settings?.creditor_zip || '8000',
+                city: settings?.creditor_city || 'Zurich',
+                country: settings?.creditor_country || 'CH'
+            },
             debtor: {
                 name: client.name,
                 address: client.billing_address || '',
@@ -50,7 +64,10 @@ export async function GET(
         });
 
         // 3. Return PDF
-        return new NextResponse(pdfBuffer, {
+        // Wrap Buffer in Blob to satisfy Response body type
+        const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+        return new NextResponse(pdfBlob, {
             headers: {
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': `inline; filename="QR_Inst_${schedule.installment_number}_${schedule.qr_reference}.pdf"`,

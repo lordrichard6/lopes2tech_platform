@@ -33,7 +33,7 @@ export function MarkPaidButton({ scheduleId, status }: MarkPaidButtonProps) {
 
             toast.success('Payment marked as processing. Waiting for admin approval.');
             router.refresh();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error marking as paid:', error);
             toast.error('Failed to update status. Please try again.');
         } finally {

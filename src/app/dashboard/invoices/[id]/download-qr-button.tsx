@@ -7,9 +7,31 @@ import { toast } from "sonner";
 import { generateSwissQRBase64 } from "@/lib/pdf/generate-qr-bill";
 
 interface DownloadQRButtonProps {
-    schedule: any;
-    invoice: any;
-    settings: any;
+    schedule: {
+        amount: number;
+        installment_number: number;
+        qr_reference?: string;
+    };
+    invoice: {
+        currency: string;
+        description?: string;
+        clients: {
+            name?: string;
+            address?: string;
+            zip?: string;
+            city?: string;
+            country?: string;
+        };
+    };
+    settings: {
+        qr_iban?: string;
+        iban?: string;
+        creditor_street?: string;
+        account_holder?: string;
+        creditor_zip?: string;
+        creditor_city?: string;
+        creditor_country?: string;
+    };
 }
 
 export function DownloadQRButton({ schedule, invoice, settings }: DownloadQRButtonProps) {
