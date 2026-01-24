@@ -1,29 +1,47 @@
 import { createClient } from "@/lib/supabase/server";
-import { createMilestoneAction, updateMilestoneStatusAction, deleteMilestoneAction } from "./actions";
 import { EditProjectDialog } from "./edit-project-dialog";
 import { DeleteProjectButton } from "./delete-project-button";
 import { MilestoneCard } from "./milestone-card";
 import { AddMilestoneDialog } from "./add-milestone-dialog";
 import { CreateInvoiceDialog } from "./create-invoice-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Trash2, CalendarDays, Wallet, Activity, Briefcase, Hash } from "lucide-react";
+import { CalendarDays, Wallet, Activity, Briefcase, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
+
+interface ProjectService {
+    service_id: string;
+    services: {
+        name: string;
+        price: number;
+        billing_type: string;
+    };
+}
+
+interface ProjectTask {
+    id: string;
+    status: string;
+}
+
+interface ProjectInvoice {
+    id: string;
+    description: string;
+    created_at: string;
+    status: string;
+    currency: string;
+    amount: number;
+}
 
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
 
     // Fetch Project with Client and Services (Force Rebuild)
-    const { data: project, error } = await supabase
+    const { data: project } = await supabase
         .from("projects")
         .select(`
       *,
@@ -41,10 +59,9 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
     if (!project) return notFound();
 
     // Calculations
-    const totalServicesCost = project.project_services?.reduce((sum: number, ps: any) => sum + (Number(ps.services?.price) || 0), 0) || 0;
+    const totalServicesCost = project.project_services?.reduce((sum: number, ps: ProjectService) => sum + (Number(ps.services?.price) || 0), 0) || 0;
     const totalTasks = project.tasks?.length || 0;
-    const completedTasks = project.tasks?.filter((t: any) => t.status === 'completed').length || 0;
-    const calculatedProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const completedTasks = project.tasks?.filter((t: ProjectTask) => t.status === 'completed').length || 0;
     const budgetUtilization = project.budget ? Math.round((totalServicesCost / project.budget) * 100) : 0;
 
     // Fetch Milestones
@@ -179,7 +196,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                         </CardHeader>
                         <CardContent className="grid gap-3">
                             {project.project_services && project.project_services.length > 0 ? (
-                                project.project_services.map((ps: any) => (
+                                project.project_services.map((ps: ProjectService) => (
                                     <div key={ps.service_id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                                         <div className="space-y-0.5">
                                             <div className="font-medium text-sm">{ps.services?.name}</div>
@@ -210,7 +227,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                         <CardContent>
                             <div className="grid gap-3">
                                 {project.invoices && project.invoices.length > 0 ? (
-                                    project.invoices.map((inv: any) => (
+                                    project.invoices.map((inv: ProjectInvoice) => (
                                         <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                                             <div className="space-y-0.5">
                                                 <div className="font-medium text-sm">
