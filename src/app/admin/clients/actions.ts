@@ -1,0 +1,122 @@
+'use server'
+
+import { requireAdmin } from '@/lib/auth'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+import { z } from 'zod'
+
+const createClientSchema = z.object({
+    name: z.string().min(1, 'Name is required'),
+    email: z.string().email('Invalid email address').optional().or(z.literal(''))
+})
+
+export async function createClientAction(formData: FormData) {
+    const { supabase } = await requireAdmin()
+
+    const rawData = {
+        name: formData.get('name'),
+        email: formData.get('email')
+    }
+
+    const valResult = createClientSchema.safeParse(rawData)
+
+    if (!valResult.success) {
+        const errorMessage = valResult.error.issues.map(e => e.message).join(', ')
+        redirect(`/admin/clients/new?error=${encodeURIComponent(errorMessage)}`)
+    }
+
+    const { name, email } = valResult.data
+
+    const { error } = await supabase
+        .from('clients')
+        .insert({
+            name,
+            contact_email: email,
+            // profile_id is left NULL initially. 
+            // It will be linked when "Portal Access" is enabled later.
+        })
+
+    if (error) {
+        redirect(`/admin/clients/new?error=${encodeURIComponent(error.message)}`)
+    }
+
+    revalidatePath('/admin/clients')
+    redirect('/admin/clients')
+    revalidatePath('/admin/clients')
+    redirect('/admin/clients')
+}
+
+export async function bulkCreateClients(clients: any[]) {
+    const { supabase } = await requireAdmin();
+
+    const validatedClients = clients.map(client => {
+        const prepared = {
+            name: client.name,
+            email: client.contact_email || client.email || ""
+        };
+
+        const validated = createClientSchema.safeParse(prepared);
+        if (!validated.success) {
+            throw new Error(`Validation error for client "${client.name}": ${validated.error.issues[0].message}`);
+        }
+        return {
+            name: validated.data.name,
+            contact_email: validated.data.email,
+            company_name: client.company_name,
+            status: client.status || 'lead',
+        };
+    });
+
+    const { error } = await supabase
+        .from('clients')
+        .insert(validatedClients);
+
+    if (error) throw new Error(error.message);
+    revalidatePath('/admin/clients');
+}
+
+export async function replaceAllClients(clients: any[]) {
+    const { supabase } = await requireAdmin();
+
+    // 1. Validate
+    const validatedClients = clients.map(client => {
+        const prepared = {
+            name: client.name,
+            email: client.contact_email || client.email || ""
+        };
+        const validated = createClientSchema.safeParse(prepared);
+        if (!validated.success) {
+            throw new Error(`Validation error for client "${client.name}": ${validated.error.issues[0].message}`);
+        }
+        return {
+            name: validated.data.name,
+            contact_email: validated.data.email,
+            company_name: client.company_name,
+            status: client.status || 'lead',
+        };
+    });
+
+    // 2. Delete All (CAREFUL: This will cascade delete projects, invoices etc if setup that way)
+    // Checking schema: clients delete cascade?
+    // User wants "same workflow".
+    // I should warn about data loss in UI.
+    const { error: deleteError } = await supabase
+        .from('clients')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (deleteError) {
+        if (deleteError.code === '23503') { // Foreign key violation if not cascade
+            throw new Error("Cannot replace: Clients have linked data (Projects/Invoices) that prevent deletion.");
+        }
+        throw new Error(`Failed to clear clients: ${deleteError.message}`);
+    }
+
+    // 3. Insert
+    const { error: insertError } = await supabase
+        .from('clients')
+        .insert(validatedClients);
+
+    if (insertError) throw new Error(insertError.message);
+    revalidatePath('/admin/clients');
+}

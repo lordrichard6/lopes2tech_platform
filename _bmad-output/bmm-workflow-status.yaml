@@ -1,0 +1,50 @@
+generated: "2026-01-12"
+project: "lopes2tech_platform_v2"
+project_type: "greenfield"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "method-greenfield.yaml"
+current_phase: 1
+phases:
+  - phase: 0
+    name: "Discovery (Optional)"
+    workflows:
+      - id: "brainstorm-project"
+        status: "skipped"
+      - id: "research"
+        status: "skipped"
+      - id: "product-brief"
+        status: "skipped"
+  - phase: 1
+    name: "Planning"
+    workflows:
+      - id: "prd"
+        status: "completed"
+        required: true
+      - id: "create-ux-design"
+        status: "pending"
+        conditional: "if_has_ui"
+  - phase: 2
+    name: "Solutioning"
+    workflows:
+      - id: "create-architecture"
+        status: "completed"
+        required: true
+      - id: "create-epics-and-stories"
+        status: "completed"
+        required: true
+      - id: "test-design"
+        status: "pending"
+        recommended: true
+      - id: "validate-architecture"
+        status: "pending"
+        optional: true
+      - id: "implementation-readiness"
+        status: "completed"
+        required: true
+  - phase: 3
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        status: "completed"
+        required: true
