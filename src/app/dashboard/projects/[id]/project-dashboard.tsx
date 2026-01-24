@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import {
-    Calendar,
     CheckCircle2,
     Clock,
     CreditCard,
@@ -14,16 +13,40 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 
+interface Project {
+    id: string;
+    name: string;
+    description: string;
+    status: string;
+    created_at: string;
+    progress: number;
+}
+
+interface Milestone {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    due_date?: string;
+}
+
+interface Invoice {
+    id: string;
+    amount: number;
+    amount_paid?: number;
+    status: string;
+}
+
 interface ProjectDashboardProps {
-    project: any;
-    milestones: any[];
-    invoices: any[];
+    project: Project;
+    milestones: Milestone[];
+    invoices: Invoice[];
 }
 
 export default function ProjectDashboard({ project, milestones, invoices }: ProjectDashboardProps) {

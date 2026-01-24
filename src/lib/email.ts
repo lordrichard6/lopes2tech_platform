@@ -29,8 +29,8 @@ export async function sendEmail({ to, subject, html }: SendEmailProps) {
         }
 
         return { success: true, data };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Email sending exception:", error);
-        return { success: false, error: error.message || "Unknown email error" };
+        return { success: false, error: (error as Error).message || "Unknown email error" };
     }
 }

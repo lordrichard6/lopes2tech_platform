@@ -72,6 +72,7 @@ interface ServicesListProps {
     initialServices: Service[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, any> = {
     Website: Globe,
     Branding: Palette,

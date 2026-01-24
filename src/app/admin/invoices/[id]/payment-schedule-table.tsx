@@ -14,8 +14,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface PaymentScheduleTableProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     schedules: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoice: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     settings: any;
 }
 

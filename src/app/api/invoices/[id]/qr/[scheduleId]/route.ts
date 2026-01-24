@@ -37,7 +37,6 @@ export async function GET(
             .single();
 
         const invoice = schedule.invoices;
-        // @ts-ignore
         const client = invoice.clients;
 
         // 2. Generate QR PDF
@@ -47,7 +46,7 @@ export async function GET(
             reference: schedule.qr_reference,
             creditor: {
                 name: settings?.account_holder || 'Lopes2Tech',
-                account: settings?.qr_iban || settings?.iban || '', // Required field
+                account: (settings?.qr_iban || settings?.iban || '') as string, // Required field
                 address: settings?.creditor_street || 'Musterstrasse 1',
                 zip: settings?.creditor_zip || '8000',
                 city: settings?.creditor_city || 'Zurich',
@@ -65,7 +64,7 @@ export async function GET(
 
         // 3. Return PDF
         // Wrap Buffer in Blob to satisfy Response body type
-        const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+        const pdfBlob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
 
         return new NextResponse(pdfBlob, {
             headers: {

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface ServiceImportExportProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     services: any[];
 }
 

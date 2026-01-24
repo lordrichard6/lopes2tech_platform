@@ -30,6 +30,7 @@ export default async function InvoicesPage() {
         .or(`user_id.eq.${user.id},contact_email.ilike.${user.email}`)
         .single();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let invoices: any[] = [];
 
     if (client) {

@@ -26,6 +26,7 @@ interface PaymentScheduleDialogProps {
         currency: string;
         payment_plan_enabled?: boolean;
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     existingSchedules?: any[];
 }
 

@@ -58,6 +58,7 @@ type FormValues = z.infer<typeof formSchema>
 export function RecordPaymentDialog({ invoiceId, invoiceAmount, amountPaid, currency }: RecordPaymentDialogProps) {
     const [open, setOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [schedules, setSchedules] = useState<any[]>([])
     const router = useRouter()
 

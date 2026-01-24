@@ -18,7 +18,7 @@ export default function NewTaskPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Submit New Request</CardTitle>
-                    <CardDescription>Describe what you need. We'll review and provide a quote.</CardDescription>
+                    <CardDescription>Describe what you need. We&apos;ll review and provide a quote.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form action={createTaskAction}>

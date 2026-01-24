@@ -74,7 +74,8 @@ export default async function DocumentAcceptancePage({
                         documentId={doc.id}
                         documentName={doc.name}
                         documentUrl={documentUrl}
-                        clientName={(doc.clients as { name: string })?.name || ''}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        clientName={(Array.isArray(doc.clients) ? doc.clients[0]?.name : (doc.clients as any)?.name) || ''}
                         token={token}
                     />
                 )}

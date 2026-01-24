@@ -21,8 +21,8 @@ export async function POST(req: Request) {
             signature,
             process.env.STRIPE_WEBHOOK_SECRET!
         );
-    } catch (error: any) {
-        return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+    } catch (error: unknown) {
+        return new NextResponse(`Webhook Error: ${(error as Error).message}`, { status: 400 });
     }
 
     const supabase = createAdminClient();
@@ -67,6 +67,7 @@ export async function POST(req: Request) {
         }
 
         if (event.type === 'invoice.payment_succeeded') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const invoice = event.data.object as any;
 
             // Handle Subscription Payment (Recurring)
@@ -111,9 +112,9 @@ export async function POST(req: Request) {
             }
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Webhook handler failed:', error);
-        return new NextResponse('Webhook handler failed', { status: 500 });
+        return new NextResponse(`Webhook handler failed: ${(error as Error).message}`, { status: 500 });
     }
 
     return new NextResponse('Received', { status: 200 });

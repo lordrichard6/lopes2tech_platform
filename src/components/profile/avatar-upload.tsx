@@ -27,19 +27,21 @@ export function AvatarUpload({ uid, url, onUploadComplete, editable = true, size
     const [avatarUrl, setAvatarUrl] = useState<string | null>(url)
     const [uploading, setUploading] = useState(false)
 
-    useEffect(() => {
-        if (url) downloadImage(url)
-    }, [url])
-
-    async function downloadImage(path: string) {
+    const downloadImage = async (path: string) => {
         try {
-            const { data, error } = await supabase.storage.from('avatars').download(path)
+            const { error } = await supabase.storage.from('avatars').download(path)
             if (error) {
+                console.error('Error downloading image: ', error)
             }
         } catch (error) {
             console.log('Error downloading image: ', error)
         }
     }
+
+    useEffect(() => {
+        if (url) downloadImage(url)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [url])
 
     // Helper to get effective URL
     const getEffectiveUrl = (pathOrUrl: string | null) => {
@@ -97,9 +99,9 @@ export function AvatarUpload({ uid, url, onUploadComplete, editable = true, size
             onUploadComplete(filePath)
             toast.success('Avatar updated successfully!')
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Upload failed details:", error)
-            toast.error(error.message || 'Error uploading avatar')
+            toast.error((error as Error).message || 'Error uploading avatar')
             // Revert optimistic update if failed
             setAvatarUrl(url)
         } finally {

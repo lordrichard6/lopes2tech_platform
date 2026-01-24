@@ -36,6 +36,8 @@ export function generateSwissQRRaw(data: SwissQRBillData): SVGElement {
         const creditorAddr = parseAddress(data.creditor.address);
         const debtorAddr = parseAddress(data.debtor.address);
 
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const qrData: any = {
             currency: data.currency,
             amount: data.amount,

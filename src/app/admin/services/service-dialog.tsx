@@ -52,11 +52,17 @@ export function ServiceDialog({ mode, service, trigger }: ServiceDialogProps) {
         description: service?.description || "",
         price: service?.price || 0,
         // Multi-language defaults
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         name_en: (service as any)?.name_en || service?.name || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         name_pt: (service as any)?.name_pt || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         name_de: (service as any)?.name_de || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         description_en: (service as any)?.description_en || service?.description || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         description_pt: (service as any)?.description_pt || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         description_de: (service as any)?.description_de || "",
         price_eur: (service as any)?.price_eur || 0,
         billing_type: service?.billing_type || "one_time",

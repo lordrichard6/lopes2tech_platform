@@ -57,6 +57,7 @@ export function DownloadQRButton({ schedule, invoice, settings }: DownloadQRButt
             const creditorAddr = parseAddress(settings.creditor_street || '');
             const debtorAddr = parseAddress(client.address || '');
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const qrData: any = {
                 currency: invoice.currency === 'EUR' ? 'EUR' : 'CHF',
                 amount: schedule.amount,
@@ -94,9 +95,9 @@ export function DownloadQRButton({ schedule, invoice, settings }: DownloadQRButt
             document.body.removeChild(link);
 
             toast.success('QR Bill downloaded successfully');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error generating QR bill:', error);
-            toast.error(error.message || 'Failed to generate QR bill');
+            toast.error((error as Error).message || 'Failed to generate QR bill');
         } finally {
             setIsLoading(false);
         }

@@ -56,7 +56,7 @@ export default async function DashboardPage() {
                     {greeting}, {client?.name?.split(' ')[0] || 'there'}! 👋
                 </h1>
                 <p className="text-muted-foreground">
-                    Here's an overview of your projects and account.
+                    Here&apos;s an overview of your projects and account.
                 </p>
             </div>
 

@@ -45,7 +45,7 @@ export default function AdminDashboard() {
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Admin Dashboard</h2>
                 <p className="text-muted-foreground">
-                    Welcome back. Here's an overview of your platform.
+                    Welcome back. Here&apos;s an overview of your platform.
                 </p>
             </div>
 

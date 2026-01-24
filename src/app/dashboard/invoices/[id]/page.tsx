@@ -66,7 +66,7 @@ export default async function InvoiceDetailsPage({ params }: { params: Promise<{
     const invoiceNumber = invoice.description?.match(/INV-[\w-]+/)?.[0] || `INV-${invoice.id.slice(0, 8).toUpperCase()}`;
 
     // Sort schedules
-    const schedules = invoice.invoice_payment_schedules?.sort((a: any, b: any) => a.installment_number - b.installment_number) || [];
+    const schedules = invoice.invoice_payment_schedules?.sort((a: { installment_number: number }, b: { installment_number: number }) => a.installment_number - b.installment_number) || [];
     const hasPaymentPlan = schedules.length > 0;
 
     // Status badge styling
@@ -246,7 +246,7 @@ export default async function InvoiceDetailsPage({ params }: { params: Promise<{
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {schedules.map((schedule: any) => (
+                                        {schedules.map((schedule: { id: string; installment_number: number; amount: number; due_date: string; status: string; qr_reference?: string }) => (
                                             <TableRow key={schedule.id}>
                                                 <TableCell className="text-sm font-medium">
                                                     #{schedule.installment_number} of {schedules.length}
@@ -293,7 +293,7 @@ export default async function InvoiceDetailsPage({ params }: { params: Promise<{
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {payments.map((payment: any) => (
+                                        {payments.map((payment: { id: string; payment_date: string; amount: number; payment_method?: string }) => (
                                             <TableRow key={payment.id}>
                                                 <TableCell className="text-sm">
                                                     {new Date(payment.payment_date).toLocaleDateString(locale === 'en' ? 'en-US' : locale === 'pt' ? 'pt-BR' : 'de-CH')}

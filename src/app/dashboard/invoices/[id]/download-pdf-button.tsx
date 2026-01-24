@@ -9,7 +9,9 @@ import { OfferPDFDocument } from '@/lib/pdf/offer-template';
 import { generateSwissQRBase64 } from '@/lib/pdf/generate-qr-bill';
 
 interface DownloadPdfButtonProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoice: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     settings: any;
 }
 
@@ -32,6 +34,7 @@ export function DownloadPdfButton({ invoice, settings }: DownloadPdfButtonProps)
                 const creditorAddr = parseAddress(settings.creditor_street || '');
                 const debtorAddr = parseAddress(invoice.clients.address || '');
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const qrData: any = {
                     currency: invoice.currency === 'EUR' ? 'EUR' : 'CHF',
                     amount: invoice.amount,
@@ -61,6 +64,7 @@ export function DownloadPdfButton({ invoice, settings }: DownloadPdfButtonProps)
             }
 
             // Construct PDF Item from Invoice
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const pdfData: any = {
                 offerNumber: invoice.id.slice(0, 8).toUpperCase(),
                 offerDate: new Date(invoice.created_at).toLocaleDateString(), // Template uses offerDate
@@ -98,9 +102,9 @@ export function DownloadPdfButton({ invoice, settings }: DownloadPdfButtonProps)
 
             toast.success('PDF generated');
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error generating PDF:', error);
-            toast.error(error.message || 'Failed to generate PDF');
+            toast.error((error as Error).message || 'Failed to generate PDF');
         } finally {
             setIsLoading(false);
         }

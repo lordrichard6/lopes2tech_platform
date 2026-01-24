@@ -94,7 +94,7 @@ export default function SuperAgentAdminPage() {
                         <div className="flex gap-4 items-start animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0" />
                             <div className="space-y-4 text-foreground leading-relaxed">
-                                <p>I'd be happy to work on a project with you! To get started, I need to understand what you'd like to create.</p>
+                                <p>I&apos;d be happy to work on a project with you! To get started, I need to understand what you&apos;d like to create.</p>
                                 <p>Here are some types of projects I can help with:</p>
 
                                 <div className="space-y-2">

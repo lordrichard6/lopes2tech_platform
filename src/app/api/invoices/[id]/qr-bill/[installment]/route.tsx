@@ -2,7 +2,6 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { SwissQRBill } from 'swissqrbill/pdf';
 import PDFDocument from 'pdfkit';
-import { format, addDays } from 'date-fns';
 
 export async function GET(
     request: NextRequest,
@@ -64,6 +63,7 @@ export async function GET(
                 const creditorAddr = parseAddress(settings.creditor_street || '');
                 const debtorAddr = parseAddress(client.address || '');
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const qrData: any = {
                     currency: invoice.currency === 'EUR' ? 'EUR' : 'CHF',
                     amount: schedule.amount,
@@ -112,8 +112,12 @@ export async function GET(
         }
 
         // If QR PDF was generated, return it directly
+        // If QR PDF was generated, return it directly
         if (qrBillPdf) {
-            return new NextResponse(qrBillPdf, {
+            // Fix Buffer type compat by converting to Uint8Array/Blob
+            const pdfBlob = new Blob([new Uint8Array(qrBillPdf)], { type: 'application/pdf' });
+
+            return new NextResponse(pdfBlob, {
                 headers: {
                     'Content-Type': 'application/pdf',
                     'Content-Disposition': `inline; filename="QR-Bill-${schedule.qr_reference}.pdf"`,
