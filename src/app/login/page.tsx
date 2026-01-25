@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { LoginForm, LoginFooter } from './login-form'
 import Image from 'next/image'
 import { LanguageSwitcher } from './language-switcher'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export default async function LoginPage({
     searchParams,
@@ -28,6 +30,7 @@ export default async function LoginPage({
                     src="/images/office-alps.png"
                     alt="Lopes2Tech Office"
                     fill
+                    sizes="50vw"
                     className="object-cover"
                     priority
                 />
@@ -37,6 +40,17 @@ export default async function LoginPage({
 
             {/* Right Side - Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+                {/* Back to Website */}
+                <div className="absolute top-8 left-8">
+                    <Link
+                        href="https://www.lopes2tech.ch"
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                    >
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                        Back to Website
+                    </Link>
+                </div>
+
                 {/* Language Switcher */}
                 <div className="absolute top-8 right-8">
                     <LanguageSwitcher />
