@@ -27,7 +27,7 @@ export async function createClientAction(formData: FormData) {
 
     const { name, email } = valResult.data
 
-    const { error } = await supabase
+    const { data: newClient, error } = await supabase
         .from('clients')
         .insert({
             name,
@@ -35,9 +35,25 @@ export async function createClientAction(formData: FormData) {
             // profile_id is left NULL initially. 
             // It will be linked when "Portal Access" is enabled later.
         })
+        .select('id')
+        .single()
 
     if (error) {
         redirect(`/admin/clients/new?error=${encodeURIComponent(error.message)}`)
+    }
+
+    // Log Activity
+    if (newClient) {
+        const { logActivity } = await import('@/lib/activity');
+        const { data: { user } } = await supabase.auth.getUser();
+
+        await logActivity({
+            userId: user?.id,
+            action: 'create_client',
+            entityType: 'client',
+            entityId: newClient.id,
+            metadata: { name, email }
+        });
     }
 
     revalidatePath('/admin/clients')

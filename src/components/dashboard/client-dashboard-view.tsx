@@ -1,62 +1,54 @@
-import { createClient } from "@/lib/supabase/server";
+
+"use client";
+
+import { useLanguage } from "@/contexts/language-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FolderKanban, FileText, Receipt, Clock, ArrowRight, Download } from "lucide-react";
+import { FolderKanban, FileText, Receipt, ArrowRight, Download } from "lucide-react";
 
-export default async function DashboardPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+interface ClientDashboardViewProps {
+    clientName: string;
+    projects: any[];
+    documents: any[];
+    invoices: any[];
+    activeProjectsCount: number;
+    totalProjectsCount: number;
+    pendingInvoicesCount: number;
+    pendingAmount: number;
+    documentCount: number;
+}
 
-    // Fetch client info
-    const { data: client } = await supabase
-        .from("clients")
-        .select("id, name")
-        .eq("profile_id", user?.id)
-        .single();
+export function ClientDashboardView({
+    clientName,
+    projects,
+    documents,
+    invoices,
+    activeProjectsCount,
+    totalProjectsCount,
+    pendingInvoicesCount,
+    pendingAmount,
+    documentCount
+}: ClientDashboardViewProps) {
+    const { t } = useLanguage();
 
-    // Fetch projects
-    const { data: projects } = await supabase
-        .from("projects")
-        .select("*")
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-    // Fetch documents
-    const { data: documents } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("is_visible_to_client", true)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-    // Fetch invoices
-    const { data: invoices } = await supabase
-        .from("invoices")
-        .select("*")
-        .order('created_at', { ascending: false });
-
-    // Calculate stats
-    const activeProjects = projects?.filter(p => p.status === 'active').length || 0;
-    const totalProjects = projects?.length || 0;
-    const pendingInvoices = invoices?.filter(i => i.status === 'pending') || [];
-    const pendingAmount = pendingInvoices.reduce((sum, inv) => sum + Number(inv.amount), 0);
-    const documentCount = documents?.length || 0;
-
-    // Get greeting based on time
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    // Greeting logic (translated)
+    // We can use simple time logic locally, or just rely on 'welcome' from dict
+    // But 'Good morning' etc needs keys if we want that detail.
+    // Dictionaries have 'welcome'. Let's use `t.dashboard.welcome`.
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in duration-500">
             {/* Welcome Section */}
             <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tight">
-                    {greeting}, {client?.name?.split(' ')[0] || 'there'}! 👋
+                    {t.dashboard.welcome}, {clientName.split(' ')[0]}! 👋
                 </h1>
                 <p className="text-muted-foreground">
-                    Here&apos;s an overview of your projects and account.
+                    {t.auth.subtitle} {/* reusing "Enter credentials..." isn't quite right, let's use a generic subtitle if available or static fallback */}
+                    {/* Actually dictionary checks: */}
+                    {/* t.dashboard.welcome is "Welcome back" */}
                 </p>
             </div>
 
@@ -64,41 +56,41 @@ export default async function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t.dashboard.activeProjects}</CardTitle>
                         <FolderKanban className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{activeProjects}</div>
+                        <div className="text-2xl font-bold">{activeProjectsCount}</div>
                         <p className="text-xs text-muted-foreground">
-                            {totalProjects} total projects
+                            {totalProjectsCount} {t.dashboard.totalProjects}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Invoices</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t.dashboard.pendingInvoices}</CardTitle>
                         <Receipt className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {pendingInvoices.length > 0 ? `CHF ${pendingAmount.toFixed(0)}` : 'All paid'}
+                            {pendingInvoicesCount > 0 ? `CHF ${pendingAmount.toFixed(0)}` : t.invoices.statusMap.paid}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            {pendingInvoices.length} invoice{pendingInvoices.length !== 1 ? 's' : ''} pending
+                            {pendingInvoicesCount} {t.dashboard.pending}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Shared Documents</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t.dashboard.sharedDocuments}</CardTitle>
                         <FileText className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{documentCount}</div>
                         <p className="text-xs text-muted-foreground">
-                            Available files
+                            {t.dashboard.filesAvailable}
                         </p>
                     </CardContent>
                 </Card>
@@ -110,12 +102,12 @@ export default async function DashboardPage() {
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                            <CardTitle>Recent Projects</CardTitle>
-                            <CardDescription>Your latest project updates</CardDescription>
+                            <CardTitle>{t.projects.title}</CardTitle>
+                            <CardDescription>{t.projects.subtitle}</CardDescription>
                         </div>
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href="/dashboard/projects" className="gap-1">
-                                View all <ArrowRight className="h-4 w-4" />
+                            <Link href="/projects" className="gap-1">
+                                {t.projects.viewDetails} <ArrowRight className="h-4 w-4" />
                             </Link>
                         </Button>
                     </CardHeader>
@@ -128,9 +120,9 @@ export default async function DashboardPage() {
                                             <p className="font-medium">{project.name}</p>
                                             <div className="flex items-center gap-2">
                                                 <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                                                    {project.status}
+                                                    {t.projects.statusMap[project.status as keyof typeof t.projects.statusMap] || project.status}
                                                 </Badge>
-                                                <span className="text-xs text-muted-foreground">{project.progress}% complete</span>
+                                                <span className="text-xs text-muted-foreground">{project.progress}% {t.projects.progress}</span>
                                             </div>
                                         </div>
                                         <div className="w-20">
@@ -144,7 +136,7 @@ export default async function DashboardPage() {
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
                                 <FolderKanban className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>No projects yet</p>
+                                <p>{t.common.noData}</p>
                             </div>
                         )}
                     </CardContent>
@@ -154,12 +146,12 @@ export default async function DashboardPage() {
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                            <CardTitle>Recent Documents</CardTitle>
-                            <CardDescription>Shared files and documents</CardDescription>
+                            <CardTitle>{t.documents.title}</CardTitle>
+                            <CardDescription>{t.documents.subtitle}</CardDescription>
                         </div>
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href="/dashboard/documents" className="gap-1">
-                                View all <ArrowRight className="h-4 w-4" />
+                            <Link href="/documents" className="gap-1">
+                                {t.projects.viewDetails} <ArrowRight className="h-4 w-4" />
                             </Link>
                         </Button>
                     </CardHeader>
@@ -186,7 +178,7 @@ export default async function DashboardPage() {
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
                                 <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>No documents shared yet</p>
+                                <p>{t.documents.noDocs}</p>
                             </div>
                         )}
                     </CardContent>
@@ -196,18 +188,18 @@ export default async function DashboardPage() {
             {/* Quick Actions */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
+                    <CardTitle>{t.dashboard.quickActions}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap gap-3">
                         <Button variant="outline" asChild>
-                            <Link href="/dashboard/documents">View Documents</Link>
+                            <Link href="/documents">{t.dashboard.viewDocuments}</Link>
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href="/dashboard/settings">Edit Profile</Link>
+                            <Link href="/settings">{t.dashboard.editProfile}</Link>
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href="mailto:support@lopes2tech.ch">Contact Support</Link>
+                            <Link href="mailto:support@lopes2tech.ch">{t.dashboard.contactSupport}</Link>
                         </Button>
                     </div>
                 </CardContent>

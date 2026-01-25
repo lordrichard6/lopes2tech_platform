@@ -82,7 +82,7 @@ export default async function InvoiceDetailsPage({ params }: { params: Promise<{
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             <div className="mb-6">
-                <Link href="/dashboard/invoices" className="text-sm text-muted-foreground hover:underline">
+                <Link href="/invoices" className="text-sm text-muted-foreground hover:underline">
                     ← {t.invoices.details.backToInvoices}
                 </Link>
             </div>

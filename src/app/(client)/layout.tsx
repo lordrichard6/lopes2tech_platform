@@ -5,6 +5,7 @@ import { DashboardUserMenu } from "@/components/layout/dashboard-user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageProvider } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export default async function DashboardLayout({
     children,
@@ -56,6 +57,7 @@ export default async function DashboardLayout({
                         <div className="container flex h-14 items-center justify-end px-4">
                             <div className="flex items-center gap-3">
                                 <LanguageSwitcher />
+                                <NotificationBell />
                                 <ThemeToggle />
                                 <DashboardUserMenu
                                     email={user.email || ''}

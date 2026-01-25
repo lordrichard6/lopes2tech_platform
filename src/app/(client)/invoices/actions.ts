@@ -76,8 +76,22 @@ export async function markScheduleProcessingAction(scheduleId: string) {
             amount: schedule.amount.toFixed(2),
             currency: invoice.currency || 'CHF'
         })
+
+        // Notify Admin via In-App Notification
+        const { data: adminProfile } = await adminDb.from('profiles').select('id').eq('role', 'admin').limit(1).single();
+        if (adminProfile) {
+            const { sendNotification } = await import('@/lib/notifications');
+            await sendNotification({
+                userId: adminProfile.id,
+                type: 'payment_processing',
+                title: 'Payment Marked Processing',
+                message: `Client ${client.contact_email} marked installment #${schedule.installment_number} as paid (${invoice.currency} ${schedule.amount}).`,
+                link: `/admin/invoices`
+            });
+        }
+
     } catch (emailError) {
-        console.error("Failed to send email:", emailError)
+        console.error("Failed to send email/notification:", emailError)
     }
 
     revalidatePath('/dashboard/invoices')

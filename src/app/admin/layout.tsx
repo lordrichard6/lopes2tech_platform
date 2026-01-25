@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminUserMenu } from "@/components/layout/admin-user-menu";
 import { ModeToggle } from "@/components/mode-toggle";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export default async function AdminLayout({
     children,
@@ -40,6 +41,7 @@ export default async function AdminLayout({
                         <div /> {/* Spacer for flex-between or add Breadcrumbs later */}
                         <div className="flex items-center gap-4">
                             <ModeToggle />
+                            <NotificationBell />
                             <AdminUserMenu email={user.email || ''} avatarUrl={profile.avatar_url} />
                         </div>
                     </div>

@@ -1,55 +1,22 @@
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin"; // Bypass RLS
-import { cookies } from "next/headers";
-import { dictionaries, Locale } from "@/lib/i18n/dictionaries";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+"use client";
+
+import { useLanguage } from "@/contexts/language-context";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Locale } from "@/lib/i18n/dictionaries";
 
-export default async function InvoicesPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+interface ClientInvoicesViewProps {
+    invoices: any[];
+}
 
-    const cookieStore = await cookies();
-    const locale = (cookieStore.get('NEXT_LOCALE')?.value || 'en') as Locale;
-    const t = dictionaries[locale];
-
-    if (!user) {
-        redirect('/login');
-    }
-
-    // Bypass RLS to find the client linked to this user (by ID or Email)
-    const adminDb = createAdminClient();
-
-    // Find client
-    const { data: client } = await adminDb
-        .from('clients')
-        .select('id, name')
-        .or(`user_id.eq.${user.id},contact_email.ilike.${user.email}`)
-        .single();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let invoices: any[] = [];
-
-    if (client) {
-        // Fetch invoices for this client (bypassing RLS to ensure visibility)
-        const { data, error } = await adminDb
-            .from("invoices")
-            .select("*, clients(name)")
-            .eq('client_id', client.id)
-            .order('created_at', { ascending: false });
-
-        if (!error && data) {
-            invoices = data;
-        } else if (error) {
-            console.error("Error fetching invoices:", error);
-        }
-    }
+export function ClientInvoicesView({ invoices }: ClientInvoicesViewProps) {
+    const { t, locale } = useLanguage();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">{t.invoices.myInvoices}</h1>
             </div>
@@ -101,7 +68,7 @@ export default async function InvoicesPage() {
                                     {t.invoices.statusMap[invoice.status as keyof typeof t.invoices.statusMap] || invoice.status}
                                 </Badge>
                                 <Button variant="outline" size="sm" asChild>
-                                    <Link href={`/dashboard/invoices/${invoice.id}`}>{t.invoices.viewDetails}</Link>
+                                    <Link href={`/invoices/${invoice.id}`}>{t.invoices.viewDetails}</Link>
                                 </Button>
                             </div>
                         </CardContent>
@@ -109,11 +76,7 @@ export default async function InvoicesPage() {
                 ))}
                 {!invoices?.length && (
                     <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg border border-dashed">
-                        {client ? (
-                            <p>{t.common.noData}</p>
-                        ) : (
-                            <p>No client profile found for your account.</p>
-                        )}
+                        <p>{t.common.noData}</p>
                     </div>
                 )}
             </div>

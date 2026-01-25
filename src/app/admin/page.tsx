@@ -24,41 +24,73 @@ export default async function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'sent')
 
-    // 2. Fetch Recent Invoices for Activity Feed
-    const { data: recentInvoices } = await supabase
-        .from('invoices')
-        .select('id, created_at, number, project:projects(name)')
+    // 2. Fetch Real Activity Logs (Plain, no join to auth.users)
+    const { data: logs } = await supabase
+        .from('activity_logs')
+        .select(`
+            id, 
+            action, 
+            entity_type, 
+            metadata, 
+            created_at,
+            user_id
+        `)
         .order('created_at', { ascending: false })
-        .limit(3)
+        .limit(5)
 
-    // 3. Fetch Recent Projects for Activity Feed
-    const { data: recentProjects } = await supabase
-        .from('projects')
-        .select('id, created_at, name')
-        .order('created_at', { ascending: false })
-        .limit(2)
+    // 3. Fetch User Profiles for the logs (Manual Join)
+    const userIds = Array.from(new Set(logs?.map(l => l.user_id).filter(Boolean) || []));
+    let profilesMap: Record<string, any> = {};
 
-    // Combine Activity
-    const activities = [
-        ...(recentInvoices?.map(inv => ({
-            id: inv.id,
-            type: 'invoice' as const,
-            description: `Invoice ${inv.number} created for ${(inv.project as any)?.name || 'Project'}`,
-            date: inv.created_at
-        })) || []),
-        ...(recentProjects?.map(proj => ({
-            id: proj.id,
-            type: 'project' as const,
-            description: `New project started: ${proj.name}`,
-            date: proj.created_at
-        })) || [])
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, email, full_name')
+            .in('id', userIds);
+
+        profiles?.forEach(p => {
+            profilesMap[p.id] = p;
+        });
+    }
+
+    // Map logs to UI format
+    const activities = logs?.map(log => {
+        let description = log.action.replace(/_/g, ' ');
+        const user = log.user_id ? profilesMap[log.user_id] : null;
+
+        // Enhance description based on metadata
+        if (log.action === 'create_invoice' && log.metadata?.amount) {
+            description = `Created invoice for CHF ${log.metadata.amount}`;
+        } else if (log.action === 'login') {
+            const email = user?.email || log.metadata?.email || 'Unknown';
+            description = `User logged in (${email})`;
+        } else if (log.action === 'payment_received') {
+            description = `Payment received: CHF ${log.metadata?.amount}`;
+        } else if (log.action === 'create_client') {
+            description = `New client: ${log.metadata?.name || 'Unknown'}`;
+        } else if (log.action === 'create_project') {
+            description = `New project: ${log.metadata?.name || 'Unknown'}`;
+        }
+
+        return {
+            id: log.id,
+            type: (log.entity_type === 'invoice' || log.entity_type === 'project' || log.entity_type === 'client')
+                ? log.entity_type
+                : 'client',
+            description: description.charAt(0).toUpperCase() + description.slice(1),
+            date: log.created_at,
+            user: {
+                name: user?.full_name || user?.email?.split('@')[0] || log.metadata?.email?.split('@')[0] || 'System',
+                avatar: ''
+            }
+        };
+    }) || [];
 
     const stats = [
         {
             title: "Total Clients",
             value: clientsCount || 0,
-            description: "Active client accounts",
+            description: "Registered clients",
             icon: Users,
             href: "/admin/clients",
             iconColor: "text-blue-500",

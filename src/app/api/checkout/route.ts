@@ -44,8 +44,8 @@ export async function POST(req: Request) {
                 },
             ],
             mode: 'payment',
-            success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/invoices/${invoice.id}?success=true`,
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/invoices/${invoice.id}?canceled=true`,
+            success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/invoices/${invoice.id}?success=true`,
+            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/invoices/${invoice.id}?canceled=true`,
             metadata: {
                 invoiceId: invoice.id,
                 userId: user.id

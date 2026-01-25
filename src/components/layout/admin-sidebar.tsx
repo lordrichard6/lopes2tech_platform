@@ -1,7 +1,7 @@
 'use client';
 
 import { Sidebar } from './sidebar';
-import { Users, FolderKanban, FileText, Inbox, ShoppingBag, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Users, FolderKanban, FileText, Inbox, ShoppingBag, LayoutDashboard, Sparkles, Clock } from 'lucide-react';
 
 export function AdminSidebar() {
     const links = [
@@ -11,6 +11,7 @@ export function AdminSidebar() {
         { title: 'Services', href: '/admin/services', icon: ShoppingBag },
         { title: 'Inbox', href: '/admin/inbox', icon: Inbox },
         { title: 'Invoices', href: '/admin/invoices', icon: FileText },
+        { title: 'Activity', href: '/admin/activity', icon: Clock },
         { title: 'Super Agent', href: '/admin/super-agent', icon: Sparkles },
     ];
 

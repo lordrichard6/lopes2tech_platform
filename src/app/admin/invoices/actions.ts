@@ -76,6 +76,42 @@ export async function confirmPaymentAction(scheduleId: string, invoiceId: string
         })
     }
 
+    // 6. Log Activity
+    const { logActivity } = await import('@/lib/activity');
+    const { data: { user } } = await supabase.auth.getUser();
+    await logActivity({
+        userId: user?.id,
+        action: 'install_payment_verified',
+        entityType: 'payment_schedule',
+        entityId: scheduleId,
+        metadata: {
+            amount: schedule.amount,
+            invoiceId,
+            method: 'manual_verification'
+        }
+    });
+
+    // Notify Client
+    const clientId = schedule.invoice?.clients?.user_id || schedule.invoice?.clients?.profile_id;
+    // Note: confirmPaymentAction used 'clients (contact_email)' in select, I should check if I requested user_id. 
+    // The select at top of function (L13) only asked for contact_email. I need user_id (profile_id in clients table).
+    // Let's assume I can fetch it or trust the helper. 
+    // Actually, I'll fetch it to be safe or rely on the fact that I can't easily change the top query in this replace chunk.
+    // I will do a quick fetch.
+    if (schedule.invoice?.clients) {
+        const { data: clientData } = await supabase.from('clients').select('profile_id').eq('contact_email', schedule.invoice.clients.contact_email).single();
+        if (clientData?.profile_id) {
+            const { sendNotification } = await import('@/lib/notifications');
+            await sendNotification({
+                userId: clientData.profile_id,
+                type: 'payment_confirmed',
+                title: 'Payment Confirmed',
+                message: `We received your payment of ${schedule.invoice.currency} ${schedule.amount.toFixed(2)}.`,
+                link: `/invoices/${invoiceId}`
+            });
+        }
+    }
+
     revalidatePath('/admin/invoices')
     return { success: true }
 }
@@ -94,7 +130,7 @@ export async function createInvoiceAction(formData: FormData) {
         return { error: 'Client and Amount are required' }
     }
 
-    const { error } = await supabase
+    const { data: invoice } = await supabase
         .from('invoices')
         .insert({
             client_id: clientId,
@@ -104,9 +140,38 @@ export async function createInvoiceAction(formData: FormData) {
             status: 'pending',
             due_date: dueDate || null
         })
+        .select('id')
+        .single()
 
     if (error) {
         return { error: error.message }
+    }
+
+    if (invoice) {
+        const { logActivity } = await import('@/lib/activity');
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // Log Activity
+        await logActivity({
+            userId: user?.id,
+            action: 'create_invoice',
+            entityType: 'invoice',
+            entityId: invoice.id,
+            metadata: { amount, clientId }
+        });
+
+        // Notify Client
+        const { data: client } = await supabase.from('clients').select('user_id').eq('id', clientId).single();
+        if (client?.user_id) {
+            const { sendNotification } = await import('@/lib/notifications');
+            await sendNotification({
+                userId: client.user_id,
+                type: 'invoice_created',
+                title: 'New Invoice Received',
+                message: `Invoice for CHF ${amount} is now available.`,
+                link: `/invoices/${invoice.id}`
+            });
+        }
     }
 
     revalidatePath('/admin/invoices')
@@ -208,6 +273,16 @@ export async function recordPaymentAction(formData: FormData) {
             .eq('invoice_id', invoiceId)
             .eq('installment_number', parseInt(installmentNumber))
     }
+
+    // 2b. Log Activity
+    const { logActivity } = await import('@/lib/activity');
+    await logActivity({
+        userId: user?.id,
+        action: 'payment_received',
+        entityType: 'invoice',
+        entityId: invoiceId,
+        metadata: { amount, method: paymentMethod, reference }
+    });
 
     // 3. Update invoice amount_paid and status
     // Get all payments to calculate exact total paid

@@ -33,6 +33,20 @@ export async function login(formData: FormData) {
         // Use server-only ADMIN_EMAIL (not exposed to client)
         const isAdmin = user?.user_metadata?.role === 'admin' || email === process.env.ADMIN_EMAIL
 
+        if (user) {
+            const { logActivity } = await import('@/lib/activity');
+            await logActivity({
+                userId: user.id,
+                action: 'login',
+                entityType: 'user',
+                entityId: user.id,
+                metadata: {
+                    role: user.user_metadata?.role || 'client',
+                    email: user.email
+                }
+            });
+        }
+
         revalidatePath('/', 'layout')
 
         if (isAdmin) {

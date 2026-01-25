@@ -46,6 +46,19 @@ export async function createProjectAction(formData: FormData) {
         }
     }
 
+    if (project) {
+        const { logActivity } = await import('@/lib/activity');
+        const { data: { user } } = await supabase.auth.getUser();
+
+        await logActivity({
+            userId: user?.id,
+            action: 'create_project',
+            entityType: 'project',
+            entityId: project.id,
+            metadata: { name, clientId, servicesCount: serviceIds.length }
+        });
+    }
+
     revalidatePath('/admin/projects')
     redirect('/admin/projects')
 }

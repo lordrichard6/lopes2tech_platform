@@ -8,10 +8,10 @@ export function ClientSidebar() {
     const { t } = useLanguage();
     const links = [
         { title: t.sidebar.dashboard, href: '/dashboard', icon: LayoutDashboard },
-        { title: t.sidebar.projects, href: '/dashboard/projects', icon: Folder },
-        { title: t.sidebar.tasks, href: '/dashboard/tasks', icon: Inbox },
-        { title: t.sidebar.documents, href: '/dashboard/documents', icon: Files },
-        { title: t.sidebar.invoices, href: '/dashboard/invoices', icon: FileText },
+        { title: t.sidebar.projects, href: '/projects', icon: Folder },
+        { title: t.sidebar.tasks, href: '/tasks', icon: Inbox },
+        { title: t.sidebar.documents, href: '/documents', icon: Files },
+        { title: t.sidebar.invoices, href: '/invoices', icon: FileText },
     ];
 
     return <Sidebar links={links} />;
