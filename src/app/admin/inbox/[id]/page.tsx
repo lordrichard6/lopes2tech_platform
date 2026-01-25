@@ -1,23 +1,33 @@
-import { createClient } from "@/lib/supabase/server";
-import { sendQuoteAction, rejectRequestAction } from "./actions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { sendQuoteAction, rejectRequestAction, deleteTaskAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function AdminReviewPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch Task
-    const { data: task } = await supabase
+    const { data: task, error } = await supabase
         .from("tasks")
-        .select("*, profiles!requester_id(full_name, email)")
+        .select("*, profiles!requester_id(full_name)")
         .eq("id", id)
         .single();
+
+    if (error || !task) {
+        console.error("Task fetch error:", error);
+        return notFound();
+    }
+
+    // Fetch User Email (since profiles doesn't have it)
+    const { data: { user } } = await supabase.auth.admin.getUserById(task.requester_id);
+    const userEmail = user?.email;
 
     if (!task) return notFound();
 
@@ -38,7 +48,7 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
                         <div>
                             <span className="text-sm font-medium block">Requester</span>
                             <div className="text-sm">{task.profiles?.full_name}</div>
-                            <div className="text-xs text-muted-foreground">{task.profiles?.email}</div>
+                            <div className="text-xs text-muted-foreground">{userEmail}</div>
                         </div>
                         <div>
                             <span className="text-sm font-medium block">Title</span>
@@ -74,11 +84,18 @@ export default async function AdminReviewPage({ params }: { params: Promise<{ id
                             <Button type="submit" className="w-full">Send Quote</Button>
                         </form>
                     </CardContent>
-                    <CardFooter className="justify-center border-t bg-muted/20 py-4">
+                    <CardFooter className="justify-center border-t bg-muted/20 py-4 items-center">
                         <form action={rejectRequestAction}>
                             <input type="hidden" name="taskId" value={task.id} />
                             <Button type="submit" variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50">
                                 Reject Request
+                            </Button>
+                        </form>
+                        <Separator orientation="vertical" className="h-6 mx-2" />
+                        <form action={deleteTaskAction}>
+                            <input type="hidden" name="taskId" value={task.id} />
+                            <Button type="submit" variant="ghost" className="text-red-700 hover:text-red-900 hover:bg-red-100">
+                                Delete Permanently
                             </Button>
                         </form>
                     </CardFooter>

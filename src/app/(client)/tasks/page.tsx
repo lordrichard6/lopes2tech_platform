@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CreateRequestDialog } from "./create-request-dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { TaskDetailsDialog } from "./task-details-dialog";
 
 export default async function TasksPage() {
     const supabase = await createClient();
@@ -17,9 +19,7 @@ export default async function TasksPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold tracking-tight">Access Requests</h1>
-                <Button asChild>
-                    <Link href="/dashboard/tasks/new">New Request</Link>
-                </Button>
+                <CreateRequestDialog />
             </div>
 
             <div className="grid gap-4">
@@ -52,9 +52,11 @@ export default async function TasksPage() {
                                 }>
                                     {task.status}
                                 </Badge>
-                                <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/dashboard/tasks/${task.id}`}>View</Link>
-                                </Button>
+                                <TaskDetailsDialog task={task}>
+                                    <Button variant="ghost" size="sm">
+                                        View
+                                    </Button>
+                                </TaskDetailsDialog>
                             </div>
                         </CardContent>
                     </Card>
@@ -63,7 +65,7 @@ export default async function TasksPage() {
                     <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg border border-dashed">
                         <p>No requests found.</p>
                         <Button variant="link" asChild>
-                            <Link href="/dashboard/tasks/new">Create your first request</Link>
+                            <Link href="/tasks/new">Create your first request</Link>
                         </Button>
                     </div>
                 )}

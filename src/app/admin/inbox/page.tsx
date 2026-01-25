@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 export default async function AdminInboxPage() {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Fetch requested tasks
     const { data: tasks } = await supabase

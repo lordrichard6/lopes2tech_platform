@@ -10,10 +10,10 @@ export default async function NotFound() {
     // Check if user is logged in
     const { data: { user } } = await supabase.auth.getUser();
 
-    // If logged in, redirect to dashboard
-    if (user) {
-        redirect('/dashboard');
-    }
+    // If logged in, we verify role to provide better context, but we DO NOT redirect automatically
+    // to avoid loops if the user is 404ing on a protected route.
+    const isClient = user && user.user_metadata?.role !== 'admin';
+    const isAdmin = user && user.user_metadata?.role === 'admin';
 
     // If not logged in, show standard 404
     return (
@@ -23,8 +23,8 @@ export default async function NotFound() {
                 The page you are looking for does not exist.
             </p>
             <Button asChild>
-                <Link href="/login">
-                    Go to Login
+                <Link href={isAdmin ? "/admin" : (isClient ? "/dashboard" : "/login")}>
+                    {isAdmin ? "Go to Admin Dashboard" : (isClient ? "Go to Dashboard" : "Go to Login")}
                 </Link>
             </Button>
         </div>

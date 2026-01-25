@@ -1,29 +1,44 @@
 import { createClient } from "@/lib/supabase/server";
 import { updateTaskStatusAction } from "./actions";
+import { cancelTaskAction } from "../actions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
+import { notFound, redirect } from "next/navigation";
 
 export default async function TaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
 
-    // Fetch Task (RLS protected)
-    const { data: task } = await supabase
+    // Verify Auth
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    console.log(`[Debug] Fetching Task: ${id} for User: ${user.id}`);
+
+    // Fetch Task (RLS protected - matches list page behavior)
+    const { data: task, error } = await supabase
         .from("tasks")
         .select("*")
         .eq("id", id)
         .single();
 
-    if (!task) return notFound();
+    if (error) {
+        console.error(`[Debug] Fetch Error: ${error.message}`);
+    }
+
+    if (!task) {
+        console.error(`[Debug] Task Not Found or Access Denied`);
+        return notFound();
+    }
+
+    console.log(`[Debug] Task Found: ${task.title}`);
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div className="mb-6">
-                <Link href="/dashboard/tasks" className="text-sm text-muted-foreground hover:underline">
+                <Link href="/tasks" className="text-sm text-muted-foreground hover:underline">
                     ← Back to Requests
                 </Link>
             </div>
@@ -38,13 +53,23 @@ export default async function TaskDetailsPage({ params }: { params: Promise<{ id
                                 <span className="text-xs text-muted-foreground">Created on {new Date(task.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <Badge variant={
-                            task.status === 'requested' ? 'secondary' :
-                                task.status === 'quoted' ? 'default' :
-                                    task.status === 'active' ? 'outline' : 'secondary'
-                        } className="text-base px-3 py-1 capitalize">
-                            {task.status}
-                        </Badge>
+                        <div className="flex gap-2 items-center">
+                            <Badge variant={
+                                task.status === 'requested' ? 'secondary' :
+                                    task.status === 'quoted' ? 'default' :
+                                        task.status === 'active' ? 'outline' : 'secondary'
+                            } className="text-base px-3 py-1 capitalize">
+                                {task.status}
+                            </Badge>
+                            {task.status === 'requested' && (
+                                <form action={cancelTaskAction}>
+                                    <input type="hidden" name="taskId" value={task.id} />
+                                    <Button type="submit" variant="destructive" size="sm">
+                                        Cancel Request
+                                    </Button>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">

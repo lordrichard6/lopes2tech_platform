@@ -53,3 +53,23 @@ export async function rejectRequestAction(formData: FormData) {
     revalidatePath(`/admin/inbox`)
     redirect('/admin/inbox')
 }
+
+export async function deleteTaskAction(formData: FormData) {
+    "use server";
+    const createAdminClient = (await import("@/lib/supabase/admin")).createAdminClient;
+    const taskId = formData.get("taskId") as string;
+    const supabase = createAdminClient();
+
+    const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", taskId);
+
+    if (error) {
+        console.error("Error deleting task:", error);
+        throw new Error("Failed to delete task");
+    }
+
+    revalidatePath("/admin/inbox");
+    redirect("/admin/inbox");
+}
