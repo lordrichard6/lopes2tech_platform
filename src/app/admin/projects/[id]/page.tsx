@@ -9,9 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, Wallet, Activity, Briefcase, Hash } from "lucide-react";
+import { CalendarDays, Wallet, Activity, Briefcase, Hash, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
+import { AddLinkDialog } from "./add-link-dialog";
+import { ProjectLinksList } from "./project-links-list";
 
 interface ProjectService {
     service_id: string;
@@ -124,7 +126,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                                         <span className="text-blue-600 dark:text-blue-400">{project.progress}%</span>
                                     </div>
                                 </div>
-                                <Progress value={project.progress} className="h-2.5 bg-slate-100 dark:bg-slate-800" indicatorClassName="bg-gradient-to-r from-blue-600 to-indigo-600" />
+                                <Progress value={project.progress} className="h-2.5 bg-slate-100 dark:bg-slate-800" />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 pt-2">
@@ -138,13 +140,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                                             <p className="text-[10px] text-muted-foreground">Budget</p>
                                         </div>
                                         <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
-                                            <div className="flex justify-between text-xs mb-1">
-                                                <span className="text-muted-foreground">Committed</span>
-                                                <span className={totalServicesCost > project.budget ? "text-red-500 font-medium" : ""}>
-                                                    CHF {totalServicesCost.toLocaleString()}
-                                                </span>
-                                            </div>
-                                            <Progress value={budgetUtilization} className="h-1.5" indicatorClassName={totalServicesCost > project.budget ? "bg-red-500" : "bg-emerald-500"} />
+                                            <Progress value={budgetUtilization} className="h-1.5" />
                                         </div>
                                     </div>
                                 ) : (
@@ -213,6 +209,19 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                             ) : (
                                 <p className="text-sm text-muted-foreground italic px-2">No services linked.</p>
                             )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Important Links */}
+                    <Card className="border-none shadow-md">
+                        <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <LinkIcon className="w-4 h-4 text-muted-foreground" /> Important Links
+                            </CardTitle>
+                            <AddLinkDialog projectId={project.id} />
+                        </CardHeader>
+                        <CardContent>
+                            <ProjectLinksList projectId={project.id} />
                         </CardContent>
                     </Card>
 

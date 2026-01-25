@@ -7,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Assuming you have this
 
-export default function NewTaskPage() {
+export default function NewRequestPage() {
     return (
         <div className="max-w-xl mx-auto">
             <div className="mb-6">
-                <Link href="/dashboard/tasks" className="text-sm text-muted-foreground hover:underline">
+                <Link href="/requests" className="text-sm text-muted-foreground hover:underline">
                     ← Back to Requests
                 </Link>
             </div>

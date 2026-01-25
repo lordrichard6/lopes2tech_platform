@@ -109,7 +109,7 @@ export default async function ProjectsPage() {
                             </CardContent>
                             <CardFooter className="pt-0">
                                 <Button asChild className="w-full">
-                                    <Link href={`/dashboard/projects/${project.id}`}>
+                                    <Link href={`/projects/${project.id}`}>
                                         {t.projects.viewDetails} <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
                                 </Button>

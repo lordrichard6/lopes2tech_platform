@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
 import { updateBillingAddress } from "./actions"
+import { useLanguage } from "@/contexts/language-context"
 
 interface BillingAddressProps {
     billingAddress: {
@@ -25,6 +26,7 @@ interface BillingAddressProps {
 }
 
 export function BillingAddress({ billingAddress, mainAddress }: BillingAddressProps) {
+    const { t } = useLanguage()
     const [saving, setSaving] = useState(false)
     const [sameAsMain, setSameAsMain] = useState(
         !billingAddress.billing_street_address &&
@@ -75,7 +77,7 @@ export function BillingAddress({ billingAddress, mainAddress }: BillingAddressPr
         if (result.error) {
             toast.error(result.error)
         } else {
-            toast.success('Billing address saved!')
+            toast.success(t.settings.billing.saving)
         }
         setSaving(false)
     }
@@ -89,47 +91,47 @@ export function BillingAddress({ billingAddress, mainAddress }: BillingAddressPr
                     onCheckedChange={(checked) => handleSameAsMain(checked as boolean)}
                 />
                 <Label htmlFor="same-as-main" className="text-sm font-normal cursor-pointer">
-                    Same as main address
+                    {t.settings.billing.sameAsMain}
                 </Label>
             </div>
 
             {!sameAsMain && (
                 <div className="space-y-4 pt-2">
                     <div className="grid gap-2">
-                        <Label htmlFor="billing_street_address">Street Address</Label>
+                        <Label htmlFor="billing_street_address">{t.settings.form.street}</Label>
                         <Input
                             id="billing_street_address"
                             value={formData.billing_street_address}
                             onChange={(e) => handleChange('billing_street_address', e.target.value)}
-                            placeholder="Billing street address"
+                            placeholder={t.settings.form.street}
                         />
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="billing_city">City</Label>
+                            <Label htmlFor="billing_city">{t.settings.form.city}</Label>
                             <Input
                                 id="billing_city"
                                 value={formData.billing_city}
                                 onChange={(e) => handleChange('billing_city', e.target.value)}
-                                placeholder="City"
+                                placeholder={t.settings.form.city}
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="billing_postal_code">Postal Code</Label>
+                            <Label htmlFor="billing_postal_code">{t.settings.form.zip}</Label>
                             <Input
                                 id="billing_postal_code"
                                 value={formData.billing_postal_code}
                                 onChange={(e) => handleChange('billing_postal_code', e.target.value)}
-                                placeholder="Postal code"
+                                placeholder={t.settings.form.zip}
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="billing_country">Country</Label>
+                            <Label htmlFor="billing_country">{t.settings.form.country}</Label>
                             <Input
                                 id="billing_country"
                                 value={formData.billing_country}
                                 onChange={(e) => handleChange('billing_country', e.target.value)}
-                                placeholder="Country"
+                                placeholder={t.settings.form.country}
                             />
                         </div>
                     </div>
@@ -139,7 +141,7 @@ export function BillingAddress({ billingAddress, mainAddress }: BillingAddressPr
             <div className="flex justify-end pt-2">
                 <Button type="submit" disabled={saving} size="sm" className="gap-2">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    {saving ? 'Saving...' : 'Save'}
+                    {saving ? t.settings.billing.saving : t.settings.billing.save}
                 </Button>
             </div>
         </form>

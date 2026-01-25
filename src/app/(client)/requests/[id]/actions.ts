@@ -14,7 +14,7 @@ export async function updateTaskStatusAction(formData: FormData) {
     // (We could enforce this more strictly with DB triggers or RLS, but app logic is fine for now)
 
     if (!taskId || !status || !['active', 'rejected'].includes(status)) {
-        redirect(`/dashboard/tasks?error=Invalid action`)
+        redirect(`/requests?error=Invalid action`)
     }
 
     const { error } = await supabase
@@ -25,9 +25,9 @@ export async function updateTaskStatusAction(formData: FormData) {
     // But for simplicity, we rely on RLS 'update own tasks' policy.
 
     if (error) {
-        redirect(`/dashboard/tasks/${taskId}?error=${encodeURIComponent(error.message)}`)
+        redirect(`/requests/${taskId}?error=${encodeURIComponent(error.message)}`)
     }
 
-    revalidatePath(`/dashboard/tasks/${taskId}`)
-    revalidatePath(`/dashboard/tasks`)
+    revalidatePath(`/requests/${taskId}`)
+    revalidatePath(`/requests`)
 }

@@ -28,7 +28,10 @@ interface TaskDetailsDialogProps {
     children: React.ReactNode;
 }
 
+import { useLanguage } from "@/contexts/language-context";
+
 export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
+    const { t } = useLanguage();
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isPending, setIsPending] = useState(false);
@@ -66,7 +69,7 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                 <DialogHeader>
                     <div className="flex justify-between items-start pr-4">
                         <DialogTitle className="text-xl">
-                            {isEditing ? "Edit Request" : task.title}
+                            {isEditing ? t.requests.dialog.edit : task.title}
                         </DialogTitle>
                         {!isEditing && (
                             <div className="flex items-center gap-2">
@@ -75,7 +78,7 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                                         task.status === 'quoted' ? 'default' :
                                             task.status === 'active' ? 'outline' : 'secondary'
                                 } className="capitalize">
-                                    {task.status}
+                                    {(t.requests.statusMap as any)[task.status] || task.status}
                                 </Badge>
                                 {task.status === 'requested' && (
                                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleEdit}>
@@ -87,7 +90,7 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                     </div>
                     {!isEditing && (
                         <DialogDescription>
-                            Created on {new Date(task.created_at).toLocaleDateString()} • {task.priority} Priority
+                            {t.requests.createdOn} {new Date(task.created_at).toLocaleDateString()} • {task.priority} {t.requests.priority}
                         </DialogDescription>
                     )}
                 </DialogHeader>
@@ -97,25 +100,24 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                         <form id="edit-form" action={wrapAction(updateTaskAction)} className="space-y-4 py-4">
                             <input type="hidden" name="taskId" value={task.id} />
                             <div className="space-y-2">
-                                <Label htmlFor="title">Title</Label>
+                                <Label htmlFor="title">{t.requests.dialog.requestTitle}</Label>
                                 <Input id="title" name="title" defaultValue={task.title} required />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="priority">Priority</Label>
+                                <Label htmlFor="priority">{t.requests.priority}</Label>
                                 <Select name="priority" defaultValue={task.priority}>
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="low">Low</SelectItem>
-                                        <SelectItem value="medium">Medium</SelectItem>
-                                        <SelectItem value="high">High</SelectItem>
-                                        <SelectItem value="urgent">Urgent</SelectItem>
+                                        <SelectItem value="low">{t.requests.dialog.priorityLow}</SelectItem>
+                                        <SelectItem value="medium">{t.requests.dialog.priorityMedium}</SelectItem>
+                                        <SelectItem value="high">{t.requests.dialog.priorityHigh}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
+                                <Label htmlFor="description">{t.requests.description}</Label>
                                 <Textarea
                                     id="description"
                                     name="description"
@@ -127,13 +129,13 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                     ) : (
                         <div className="space-y-6 py-4">
                             <div>
-                                <h4 className="text-sm font-medium mb-2">Description</h4>
+                                <h4 className="text-sm font-medium mb-2">{t.requests.description}</h4>
                                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{task.description}</p>
                             </div>
 
                             {task.quote_amount && (
                                 <div className="bg-muted/50 p-4 rounded-lg border">
-                                    <h3 className="font-semibold mb-1">Quote Received</h3>
+                                    <h3 className="font-semibold mb-1">{t.requests.quoteReceived}</h3>
                                     <div className="text-3xl font-bold flex items-baseline gap-1">
                                         {task.quote_amount} <span className="text-lg font-normal text-muted-foreground">{task.quote_currency}</span>
                                     </div>
@@ -150,22 +152,22 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                     {/* ACTIONS */}
                     {isEditing ? (
                         <div className="flex w-full justify-end gap-2">
-                            <Button variant="ghost" onClick={toggleEdit} disabled={isPending}>Cancel</Button>
+                            <Button variant="ghost" onClick={toggleEdit} disabled={isPending}>{t.requests.dialog.cancel}</Button>
                             <Button type="submit" form="edit-form" disabled={isPending}>
                                 {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
-                                Save Changes
+                                {t.requests.dialog.save}
                             </Button>
                         </div>
                     ) : (
                         <>
                             {task.status === 'requested' && (
                                 <div className="flex w-full justify-between items-center">
-                                    <span className="text-xs text-muted-foreground">Waiting for review...</span>
+                                    <span className="text-xs text-muted-foreground">{t.requests.dialog.waiting}</span>
                                     <form action={wrapAction(cancelTaskAction)}>
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <Button type="submit" variant="destructive" disabled={isPending} size="sm">
                                             {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                                            Cancel Request
+                                            {t.requests.cancelRequest}
                                         </Button>
                                     </form>
                                 </div>
@@ -177,14 +179,14 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <input type="hidden" name="status" value="rejected" />
                                         <Button type="submit" variant="destructive" disabled={isPending}>
-                                            Decline
+                                            {t.requests.declineQuote}
                                         </Button>
                                     </form>
                                     <form action={wrapAction(updateTaskStatusAction)}>
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <input type="hidden" name="status" value="active" />
                                         <Button type="submit" disabled={isPending}>
-                                            Approve Quote
+                                            {t.requests.approveQuote}
                                         </Button>
                                     </form>
                                 </div>

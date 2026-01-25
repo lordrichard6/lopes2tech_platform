@@ -123,29 +123,36 @@
 
 /* Forest Theme - Calm & Natural */
 [data-theme-color='forest'] {
-  --primary: #10b981;
+  --primary: #3C3D37;
   --primary-foreground: #ffffff;
-  --ring: #10b981;
-  --sidebar-primary: #10b981;
-  --sidebar-accent-foreground: #10b981;
-  --sidebar-ring: #10b981;
-  --chart-1: #10b981;
-  --chart-2: #059669;
-  --chart-3: #6ee7b7;
+  --ring: #3C3D37;
+  --sidebar-primary: #3C3D37;
+  --sidebar-accent-foreground: #3C3D37;
+  --sidebar-ring: #3C3D37;
+  --chart-1: #3C3D37;
+  --chart-2: #2A2F26;
+  --chart-3: #8F9988;
 }
 
-/* Minimal Theme - Monochrome & Sleek */
-[data-theme-color='minimal'] {
-  --primary: #18181b;
-  --primary-foreground: #ffffff;
-  --ring: #18181b;
-  --sidebar-primary: #18181b;
-  --sidebar-accent-foreground: #18181b;
-  --sidebar-ring: #18181b;
-  --chart-1: #18181b;
-  --chart-2: #52525b;
-  --chart-3: #a1a1aa;
+
+
+/* Neutral Theme - Beige & Earthy */
+[data-theme-color='neutral'] {
+  --primary: #DFD0B8;
+  --primary-foreground: #1b2559;
+  /* Dark text for contrast on light beige */
+  --ring: #DFD0B8;
+  --sidebar-primary: #DFD0B8;
+  --sidebar-accent-foreground: #DFD0B8;
+  --sidebar-ring: #DFD0B8;
+  --chart-1: #DFD0B8;
+  --chart-2: #8D8373;
+  /* Earthy Taupe */
+  --chart-3: #2D3642;
+  /* Soft Dark */
 }
+
+
 
 /* Dark Theme - Lopes2Tech Brand */
 .dark {
@@ -216,4 +223,82 @@
   100% {
     background-position: -200% center;
   }
+}
+
+/* --- THEME OVERRIDES --- */
+
+/* Forest Theme Dark Mode Overrides */
+.dark [data-theme-color='forest'] {
+  --background: #111210;
+  /* Deep Earthy Dark */
+  --foreground: #f0f0f0;
+  --card: #1A1B18;
+  /* Dark Olive Card */
+  --card-foreground: #f0f0f0;
+  --popover: #1A1B18;
+  --popover-foreground: #f0f0f0;
+  --secondary: #2C2D29;
+  --secondary-foreground: #f0f0f0;
+  --muted: #2C2D29;
+  --muted-foreground: #9AA096;
+  --accent: #2C2D29;
+  --accent-foreground: #f0f0f0;
+  --border: #3A3C36;
+  --input: #3A3C36;
+  --sidebar: #0D0E0C;
+  /* Sidebar Dark */
+  --sidebar-foreground: #f0f0f0;
+  --sidebar-accent: #242521;
+  --sidebar-border: #3A3C36;
+}
+
+/* Sunset Theme Dark Mode Overrides */
+.dark [data-theme-color='sunset'] {
+  --background: #180806;
+  /* Very Dark Warm Brown */
+  --foreground: #f0f0f0;
+  --card: #28100B;
+  /* Dark Red-Brown Card */
+  --card-foreground: #f0f0f0;
+  --popover: #28100B;
+  --popover-foreground: #f0f0f0;
+  --secondary: #3D1812;
+  --secondary-foreground: #f0f0f0;
+  --muted: #3D1812;
+  --muted-foreground: #A88B88;
+  --accent: #3D1812;
+  --accent-foreground: #f0f0f0;
+  --border: #4A1D16;
+  --input: #4A1D16;
+  --sidebar: #120503;
+  /* Sidebar Dark Warm */
+  --sidebar-foreground: #f0f0f0;
+  --sidebar-accent: #2A100B;
+  --sidebar-border: #4A1D16;
+  --ring: #ea580c;
+}
+
+/* Neutral Theme Dark Mode Overrides */
+.dark [data-theme-color='neutral'] {
+  --background: #141414;
+  /* Neutral Dark */
+  --foreground: #f0f0f0;
+  --card: #1f1f1f;
+  /* Neutral Card */
+  --card-foreground: #f0f0f0;
+  --popover: #1f1f1f;
+  --popover-foreground: #f0f0f0;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #f0f0f0;
+  --muted: #2a2a2a;
+  --muted-foreground: #a0a0a0;
+  --accent: #2a2a2a;
+  --accent-foreground: #f0f0f0;
+  --border: #333333;
+  --input: #333333;
+  --sidebar: #111111;
+  /* Neutral Sidebar */
+  --sidebar-foreground: #f0f0f0;
+  --sidebar-accent: #262626;
+  --sidebar-border: #333333;
 }

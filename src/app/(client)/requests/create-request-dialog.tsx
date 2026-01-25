@@ -24,8 +24,10 @@ import {
 import { Plus, Loader2 } from "lucide-react";
 import { createTaskAction } from "./actions";
 import { toast } from "sonner"; // Assuming sonner is used, typical in shadcn/ui setups. If not, can fallback to alert or other.
+import { useLanguage } from "@/contexts/language-context";
 
 export function CreateRequestDialog() {
+    const { t } = useLanguage();
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -36,11 +38,11 @@ export function CreateRequestDialog() {
             if (result.error) {
                 toast.error(result.error);
             } else {
-                toast.success("Request submitted successfully!");
+                toast.success(t.requests.dialog.success);
                 setOpen(false);
             }
         } catch (error) {
-            toast.error("Failed to submit request.");
+            toast.error(t.requests.dialog.error);
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -52,14 +54,14 @@ export function CreateRequestDialog() {
             <DialogTrigger asChild>
                 <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    New Request
+                    {t.requests.newRequest}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Submit New Request</DialogTitle>
+                    <DialogTitle>{t.requests.dialog.title}</DialogTitle>
                     <DialogDescription>
-                        Describe what you need. We'll review and provide a quote.
+                        {t.requests.dialog.description}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={(e) => {
@@ -70,39 +72,39 @@ export function CreateRequestDialog() {
                 }}>
                     <div className="grid gap-4 py-4">
                         <div className="flex flex-col space-y-2">
-                            <Label htmlFor="title">Request Title</Label>
+                            <Label htmlFor="title">{t.requests.dialog.requestTitle}</Label>
                             <Input id="title" name="title" placeholder="e.g. Add Blog Section" required />
                         </div>
                         <div className="flex flex-col space-y-2">
-                            <Label htmlFor="priority">Priority</Label>
+                            <Label htmlFor="priority">{t.requests.priority}</Label>
                             <Select name="priority" defaultValue="medium">
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select priority" />
+                                    <SelectValue placeholder={t.requests.dialog.priorityPlaceholder} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="low">Low</SelectItem>
-                                    <SelectItem value="medium">Medium</SelectItem>
-                                    <SelectItem value="high">High</SelectItem>
+                                    <SelectItem value="low">{t.requests.dialog.priorityLow}</SelectItem>
+                                    <SelectItem value="medium">{t.requests.dialog.priorityMedium}</SelectItem>
+                                    <SelectItem value="high">{t.requests.dialog.priorityHigh}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="flex flex-col space-y-2">
-                            <Label htmlFor="description">Details</Label>
+                            <Label htmlFor="description">{t.requests.dialog.details}</Label>
                             <Textarea
                                 id="description"
                                 name="description"
-                                placeholder="Provide as much detail as possible..."
+                                placeholder="..."
                                 className="min-h-[100px]"
                             />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
-                            Cancel
+                            {t.requests.dialog.cancel}
                         </Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Submit Request
+                            {t.requests.dialog.submit}
                         </Button>
                     </DialogFooter>
                 </form>

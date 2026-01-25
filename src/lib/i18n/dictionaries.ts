@@ -21,7 +21,7 @@ export type Dictionary = {
             horizon: string;
             sunset: string;
             forest: string;
-            minimal: string;
+            neutral: string;
         };
     };
     projects: {
@@ -105,7 +105,7 @@ export type Dictionary = {
     sidebar: {
         dashboard: string;
         projects: string;
-        tasks: string;
+        requests: string;
         documents: string;
         invoices: string;
     };
@@ -125,6 +125,85 @@ export type Dictionary = {
             success: string;
         };
     };
+    settings: {
+        title: string;
+        description: string;
+        profileInformation: string;
+        profileDescription: string;
+        billingAddress: string;
+        billingDescription: string;
+        security: string;
+        securityDescription: string;
+        saveChanges: string;
+        saving: string;
+        billing: {
+            sameAsMain: string;
+            save: string;
+            saving: string;
+        };
+        securityForm: {
+            newPassword: string;
+            newPasswordDesc: string;
+            confirmPassword: string;
+            updatePassword: string;
+            passwordMismatch: string;
+            passwordMinLength: string;
+            success: string;
+        };
+        form: {
+            fullName: string;
+            email: string;
+            company: string;
+            phone: string;
+            secondaryEmail: string;
+            whatsapp: string;
+            street: string;
+            city: string;
+            zip: string;
+            country: string;
+            preferences: string;
+            language: string;
+            timezone: string;
+            address: string;
+        };
+    };
+    requests: {
+        title: string;
+        newRequest: string;
+        noRequests: string;
+        createFirst: string;
+        view: string;
+        quote: string;
+        priority: string;
+        createdOn: string;
+        cancelRequest: string;
+        description: string;
+        quoteReceived: string;
+        approveQuote: string;
+        declineQuote: string;
+        dialog: {
+            title: string;
+            description: string;
+            requestTitle: string;
+            details: string;
+            cancel: string;
+            submit: string;
+            success: string;
+            error: string;
+            priorityLow: string;
+            priorityMedium: string;
+            priorityHigh: string;
+            priorityPlaceholder: string;
+        };
+        statusMap: {
+            requested: string;
+            quoted: string;
+            active: string;
+            rejected: string;
+            completed: string;
+            cancelled: string;
+        };
+    };
     auth: {
         title: string;
         subtitle: string;
@@ -140,6 +219,85 @@ export type Dictionary = {
 
 export const dictionaries: Record<Locale, Dictionary> = {
     en: {
+        settings: {
+            title: "Settings",
+            description: "Manage your account settings and preferences.",
+            profileInformation: "Profile Information",
+            profileDescription: "Your personal and business details.",
+            billingAddress: "Billing Address",
+            billingDescription: "Address used for invoices.",
+            security: "Security",
+            securityDescription: "Update your password to keep your account secure.",
+            saveChanges: "Save Changes",
+            saving: "Saving...",
+            billing: {
+                sameAsMain: "Same as main address",
+                save: "Save",
+                saving: "Saving...",
+            },
+            securityForm: {
+                newPassword: "New Password",
+                newPasswordDesc: "Enter your new password.",
+                confirmPassword: "Confirm Password",
+                updatePassword: "Update Password",
+                passwordMismatch: "Passwords don't match",
+                passwordMinLength: "Password must be at least 6 characters.",
+                success: "Password updated successfully",
+            },
+            form: {
+                fullName: "Full Name",
+                email: "Email",
+                company: "Company",
+                phone: "Phone",
+                secondaryEmail: "Secondary Email",
+                whatsapp: "WhatsApp Number",
+                street: "Street Address",
+                city: "City",
+                zip: "Postal Code",
+                country: "Country",
+                preferences: "Preferences",
+                language: "Preferred Language",
+                timezone: "Timezone",
+                address: "Address",
+            }
+        },
+        requests: {
+            title: "Access Requests",
+            newRequest: "New Request",
+            noRequests: "No requests found.",
+            createFirst: "Create your first request",
+            view: "View",
+            quote: "Quote",
+            priority: "Priority",
+            createdOn: "Created on",
+            cancelRequest: "Cancel Request",
+            description: "Description",
+            quoteReceived: "Quote Received",
+            approveQuote: "Approve Quote",
+            declineQuote: "Decline",
+            dialog: {
+                title: "Submit New Request",
+                description: "Describe what you need. We'll review and provide a quote.",
+                requestTitle: "Request Title",
+                details: "Details",
+                cancel: "Cancel",
+                submit: "Submit Request",
+                success: "Request submitted successfully!",
+                error: "Failed to submit request.",
+                priorityLow: "Low",
+                priorityMedium: "Medium",
+                priorityHigh: "High",
+                priorityPlaceholder: "Select priority",
+            },
+            statusMap: {
+                requested: "Requested",
+                quoted: "Quoted",
+                active: "Active",
+                rejected: "Rejected",
+                completed: "Completed",
+                cancelled: "Cancelled",
+            },
+        },
         auth: {
             title: "Welcome to my office",
             subtitle: "Enter your credentials to access your account",
@@ -168,10 +326,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             signOut: "Sign out",
             theme: {
                 title: "Theme Color",
-                horizon: "Horizon (Default)",
+                horizon: "Deep Blue",
                 sunset: "Sunset",
                 forest: "Forest",
-                minimal: "Minimal",
+                neutral: "Neutral",
             },
         },
         projects: {
@@ -255,7 +413,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         sidebar: {
             dashboard: "Dashboard",
             projects: "My Projects",
-            tasks: "Tasks",
+            requests: "Requests",
             documents: "Documents",
             invoices: "Invoices",
         },
@@ -277,6 +435,85 @@ export const dictionaries: Record<Locale, Dictionary> = {
         },
     },
     pt: {
+        settings: {
+            title: "Configurações",
+            description: "Gerencie as configurações e preferências da sua conta.",
+            profileInformation: "Informações do Perfil",
+            profileDescription: "Seus detalhes pessoais e comerciais.",
+            billingAddress: "Endereço de Cobrança",
+            billingDescription: "Endereço usado para faturas.",
+            security: "Segurança",
+            securityDescription: "Atualize sua senha para manter sua conta segura.",
+            saveChanges: "Salvar Alterações",
+            saving: "Salvando...",
+            billing: {
+                sameAsMain: "Igual ao endereço principal",
+                save: "Salvar",
+                saving: "Salvando...",
+            },
+            securityForm: {
+                newPassword: "Nova Senha",
+                newPasswordDesc: "Digite sua nova senha.",
+                confirmPassword: "Confirmar Senha",
+                updatePassword: "Atualizar Senha",
+                passwordMismatch: "As senhas não coincidem",
+                passwordMinLength: "A senha deve ter pelo menos 6 caracteres.",
+                success: "Senha atualizada com sucesso",
+            },
+            form: {
+                fullName: "Nome Completo",
+                email: "Email",
+                company: "Empresa",
+                phone: "Telefone",
+                secondaryEmail: "Email Secundário",
+                whatsapp: "Número WhatsApp",
+                street: "Endereço",
+                city: "Cidade",
+                zip: "Código Postal",
+                country: "País",
+                preferences: "Preferências",
+                language: "Idioma Preferido",
+                timezone: "Fuso Horário",
+                address: "Endereço",
+            }
+        },
+        requests: {
+            title: "Solicitações de Acesso",
+            newRequest: "Nova Solicitação",
+            noRequests: "Nenhuma solicitação encontrada.",
+            createFirst: "Crie sua primeira solicitação",
+            view: "Ver",
+            quote: "Cotação",
+            priority: "Prioridade",
+            createdOn: "Criado em",
+            cancelRequest: "Cancelar Solicitação",
+            description: "Descrição",
+            quoteReceived: "Cotação Recebida",
+            approveQuote: "Aprovar Cotação",
+            declineQuote: "Recusar",
+            dialog: {
+                title: "Enviar Nova Solicitação",
+                description: "Descreva o que precisa. Analisaremos e enviaremos uma cotação.",
+                requestTitle: "Título da Solicitação",
+                details: "Detalhes",
+                cancel: "Cancelar",
+                submit: "Enviar Solicitação",
+                success: "Solicitação enviada com sucesso!",
+                error: "Falha ao enviar solicitação.",
+                priorityLow: "Baixa",
+                priorityMedium: "Média",
+                priorityHigh: "Alta",
+                priorityPlaceholder: "Selecione a prioridade",
+            },
+            statusMap: {
+                requested: "Solicitado",
+                quoted: "Cotado",
+                active: "Ativo",
+                rejected: "Rejeitado",
+                completed: "Concluído",
+                cancelled: "Cancelado",
+            },
+        },
         auth: {
             title: "Bem-vindo ao meu escritório",
             subtitle: "Insira suas credenciais para acessar sua conta",
@@ -305,10 +542,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             signOut: "Sair",
             theme: {
                 title: "Cor do Tema",
-                horizon: "Horizonte (Padrão)",
+                horizon: "Azul Profundo",
                 sunset: "Pôr do Sol",
                 forest: "Floresta",
-                minimal: "Minimalista",
+                neutral: "Neutro",
             },
         },
         projects: {
@@ -392,7 +629,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         sidebar: {
             dashboard: "Painel",
             projects: "Meus Projetos",
-            tasks: "Tarefas",
+            requests: "Solicitações",
             documents: "Documentos",
             invoices: "Faturas",
         },
@@ -414,6 +651,85 @@ export const dictionaries: Record<Locale, Dictionary> = {
         },
     },
     de: {
+        settings: {
+            title: "Einstellungen",
+            description: "Verwalten Sie Ihre Kontoeinstellungen und -präferenzen.",
+            profileInformation: "Profilinformationen",
+            profileDescription: "Ihre persönlichen und geschäftlichen Details.",
+            billingAddress: "Rechnungsadresse",
+            billingDescription: "Für Rechnungen verwendete Adresse.",
+            security: "Sicherheit",
+            securityDescription: "Aktualisieren Sie Ihr Passwort, um Ihr Konto sicher zu halten.",
+            saveChanges: "Änderungen speichern",
+            saving: "Speichern...",
+            billing: {
+                sameAsMain: "Wie Hauptadresse",
+                save: "Speichern",
+                saving: "Speichern...",
+            },
+            securityForm: {
+                newPassword: "Neues Passwort",
+                newPasswordDesc: "Geben Sie Ihr neues Passwort ein.",
+                confirmPassword: "Passwort bestätigen",
+                updatePassword: "Passwort aktualisieren",
+                passwordMismatch: "Passwörter stimmen nicht überein",
+                passwordMinLength: "Passwort muss mindestens 6 Zeichen lang sein.",
+                success: "Passwort erfolgreich aktualisiert",
+            },
+            form: {
+                fullName: "Voller Name",
+                email: "E-Mail",
+                company: "Firma",
+                phone: "Telefon",
+                secondaryEmail: "Zweit-E-Mail",
+                whatsapp: "WhatsApp-Nummer",
+                street: "Straße / Nr.",
+                city: "Stadt",
+                zip: "Postleitzahl",
+                country: "Land",
+                preferences: "Präferenzen",
+                language: "Bevorzugte Sprache",
+                timezone: "Zeitzone",
+                address: "Adresse",
+            }
+        },
+        requests: {
+            title: "Zugriffsanfragen",
+            newRequest: "Neue Anfrage",
+            noRequests: "Keine Anfragen gefunden.",
+            createFirst: "Erstellen Sie Ihre erste Anfrage",
+            view: "Ansehen",
+            quote: "Angebot",
+            priority: "Priorität",
+            createdOn: "Erstellt am",
+            cancelRequest: "Anfrage stornieren",
+            description: "Beschreibung",
+            quoteReceived: "Angebot erhalten",
+            approveQuote: "Angebot annehmen",
+            declineQuote: "Ablehnen",
+            dialog: {
+                title: "Neue Anfrage senden",
+                description: "Beschreiben Sie Ihren Bedarf. Wir prüfen es und senden ein Angebot.",
+                requestTitle: "Anfragetitel",
+                details: "Details",
+                cancel: "Abbrechen",
+                submit: "Anfrage senden",
+                success: "Anfrage erfolgreich gesendet!",
+                error: "Fehler beim Senden der Anfrage.",
+                priorityLow: "Niedrig",
+                priorityMedium: "Mittel",
+                priorityHigh: "Hoch",
+                priorityPlaceholder: "Priorität wählen",
+            },
+            statusMap: {
+                requested: "Angefragt",
+                quoted: "Angeboten",
+                active: "Aktiv",
+                rejected: "Abgelehnt",
+                completed: "Abgeschlossen",
+                cancelled: "Storniert",
+            },
+        },
         auth: {
             title: "Willkommen in meinem Büro",
             subtitle: "Geben Sie Ihre Anmeldedaten ein, um auf Ihr Konto zuzugreifen",
@@ -442,10 +758,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             signOut: "Abmelden",
             theme: {
                 title: "Themenfarbe",
-                horizon: "Horizont (Standard)",
+                horizon: "Tiefblau",
                 sunset: "Sonnenuntergang",
                 forest: "Wald",
-                minimal: "Minimalistisch",
+                neutral: "Neutral",
             },
         },
         projects: {
@@ -529,7 +845,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
         sidebar: {
             dashboard: "Dashboard",
             projects: "Meine Projekte",
-            tasks: "Aufgaben",
+            requests: "Anfragen",
             documents: "Dokumente",
             invoices: "Rechnungen",
         },

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface SidebarLink {
     title: string;
@@ -20,6 +20,11 @@ interface SidebarProps {
 export function Sidebar({ links, bottomLinks }: SidebarProps) {
     const pathname = usePathname();
     const [isHovered, setIsHovered] = useState(false);
+
+    // Close sidebar on route change (useful for mobile/touch where hover state might persist)
+    useEffect(() => {
+        setIsHovered(false);
+    }, [pathname]);
 
     return (
         <aside

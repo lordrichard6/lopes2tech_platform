@@ -5,9 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { TaskDetailsDialog } from "./task-details-dialog";
+import { cookies } from "next/headers";
+import { dictionaries, Locale } from "@/lib/i18n/dictionaries";
 
-export default async function TasksPage() {
+export default async function RequestsPage() {
     const supabase = await createClient();
+    const cookieStore = await cookies();
+    const locale = (cookieStore.get('NEXT_LOCALE')?.value || 'en') as Locale;
+    const t = dictionaries[locale] || dictionaries.en;
 
     // RLS ensures users only see their own tasks
     const { data: tasks, error } = await supabase
@@ -18,7 +23,7 @@ export default async function TasksPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Access Requests</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t.requests.title}</h1>
                 <CreateRequestDialog />
             </div>
 
@@ -30,18 +35,18 @@ export default async function TasksPage() {
                                 <div className="font-semibold text-lg flex items-center gap-2">
                                     {task.title}
                                     <Badge variant="outline" className="text-xs font-normal capitalize">
-                                        {task.priority}
+                                        {((t.requests.dialog as any)[`priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`] || task.priority)}
                                     </Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground line-clamp-1">
-                                    {task.description || "No description provided."}
+                                    {task.description || t.requests.dialog.description}
                                 </p>
                             </div>
 
                             <div className="flex items-center gap-4">
                                 {task.quote_amount && (
                                     <div className="text-right">
-                                        <div className="text-sm text-muted-foreground">Quote</div>
+                                        <div className="text-sm text-muted-foreground">{t.requests.quote}</div>
                                         <div className="font-bold">{task.quote_amount} {task.quote_currency}</div>
                                     </div>
                                 )}
@@ -50,11 +55,11 @@ export default async function TasksPage() {
                                         task.status === 'quoted' ? 'default' :
                                             task.status === 'active' ? 'outline' : 'secondary'
                                 }>
-                                    {task.status}
+                                    {(t.requests.statusMap as any)[task.status] || task.status}
                                 </Badge>
                                 <TaskDetailsDialog task={task}>
                                     <Button variant="ghost" size="sm">
-                                        View
+                                        {t.requests.view}
                                     </Button>
                                 </TaskDetailsDialog>
                             </div>
@@ -63,9 +68,9 @@ export default async function TasksPage() {
                 ))}
                 {!tasks?.length && (
                     <div className="text-center py-12 text-muted-foreground bg-muted/50 rounded-lg border border-dashed">
-                        <p>No requests found.</p>
+                        <p>{t.requests.noRequests}</p>
                         <Button variant="link" asChild>
-                            <Link href="/tasks/new">Create your first request</Link>
+                            <Link href="/requests/new">{t.requests.createFirst}</Link>
                         </Button>
                     </div>
                 )}

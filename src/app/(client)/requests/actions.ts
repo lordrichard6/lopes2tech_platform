@@ -67,7 +67,7 @@ export async function createTaskAction(formData: FormData) {
         metadata: { title, priority }
     });
 
-    revalidatePath('/tasks')
+    revalidatePath('/requests')
     return { success: true }
 }
 
@@ -126,7 +126,7 @@ export async function cancelTaskAction(formData: FormData) {
 
     if (deleteError) return { error: deleteError.message }
 
-    revalidatePath('/tasks')
+    revalidatePath('/requests')
     return { success: true }
 }
 
@@ -165,6 +165,6 @@ export async function updateTaskAction(formData: FormData) {
 
     if (error) return { error: error.message }
 
-    revalidatePath('/tasks')
+    revalidatePath('/requests')
     return { success: true }
 }

@@ -9,7 +9,19 @@ import {
     Flag,
     LayoutDashboard,
     MoreVertical,
-    TrendingUp
+    TrendingUp,
+    Link2,
+    Github,
+    Figma,
+    Trello,
+    Slack,
+    File,
+    Globe,
+    Server,
+    Database,
+    Image,
+    Video,
+    Box
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +30,12 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Project {
     id: string;
@@ -43,13 +61,37 @@ interface Invoice {
     status: string;
 }
 
+interface ProjectLink {
+    id: string;
+    name: string;
+    url: string;
+    description?: string;
+    icon: string;
+}
+
 interface ProjectDashboardProps {
     project: Project;
     milestones: Milestone[];
     invoices: Invoice[];
+    links: ProjectLink[];
 }
 
-export default function ProjectDashboard({ project, milestones, invoices }: ProjectDashboardProps) {
+const IconMap: Record<string, any> = {
+    github: Github,
+    figma: Figma,
+    trello: Trello,
+    slack: Slack,
+    link: Link2,
+    file: File,
+    globe: Globe,
+    server: Server,
+    database: Database,
+    image: Image,
+    video: Video,
+    box: Box,
+};
+
+export default function ProjectDashboard({ project, milestones, invoices, links }: ProjectDashboardProps) {
     const { t } = useLanguage();
 
     // Calculate financial stats
@@ -91,7 +133,7 @@ export default function ProjectDashboard({ project, milestones, invoices }: Proj
             {/* Header / Back Link */}
             <motion.div variants={item}>
                 <Link
-                    href="/dashboard/projects"
+                    href="/projects"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 mb-4"
                 >
                     ← {t.projects.backToProjects}
@@ -245,13 +287,48 @@ export default function ProjectDashboard({ project, milestones, invoices }: Proj
                                     <Progress value={paymentProgress} className="h-3" />
                                 </div>
                                 <Button variant="outline" className="w-full" asChild>
-                                    <Link href={invoices.length === 1 ? `/dashboard/invoices/${invoices[0].id}` : `/dashboard/invoices?project_id=${project.id}`}>
+                                    <Link href={invoices.length === 1 ? `/invoices/${invoices[0].id}` : `/invoices?project_id=${project.id}`}>
                                         {t.projects.viewInvoices}
                                     </Link>
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Important Links Section */}
+                    {links && links.length > 0 && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <Link2 className="w-5 h-5" />
+                                Important Links
+                            </h3>
+                            <div className="grid grid-cols-4 gap-2">
+                                {links.map((link) => {
+                                    const Icon = IconMap[link.icon] || Link2;
+                                    return (
+                                        <TooltipProvider key={link.id}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <a
+                                                        href={link.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex items-center justify-center aspect-square rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
+                                                    >
+                                                        <Icon className="w-5 h-5" />
+                                                    </a>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="font-semibold">{link.name}</p>
+                                                    {link.description && <p className="text-xs text-muted-foreground">{link.description}</p>}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Quick Actions */}
                     <div className="space-y-4">

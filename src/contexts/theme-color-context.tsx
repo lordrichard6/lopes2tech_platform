@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
-export type ThemeColor = "horizon" | "sunset" | "forest" | "minimal";
+export type ThemeColor = "horizon" | "sunset" | "forest" | "neutral";
 
 interface ThemeColorContextType {
     themeColor: ThemeColor;

@@ -1,17 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
-import { PasswordForm } from "./password-form"
-import { ProfileForm } from "./profile-form"
-import { BillingAddress } from "./billing-address"
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import { AvatarUpload } from "@/components/profile/avatar-upload"
+import { SettingsView } from "./settings-view"
 import { revalidatePath } from "next/cache"
-import { Separator } from "@/components/ui/separator"
 
 interface ClientProfile {
     name: string
@@ -107,77 +96,11 @@ export default async function SettingsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h3 className="text-lg font-medium">Settings</h3>
-                <p className="text-sm text-muted-foreground">
-                    Manage your account settings and preferences.
-                </p>
-            </div>
-
-            {/* Profile Information */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>
-                        Your personal and business details.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-                        <div className="flex-shrink-0">
-                            <AvatarUpload
-                                uid={user?.id || ''}
-                                url={avatarUrl}
-                                onUploadComplete={handleAvatarUpdate}
-                                size="lg"
-                            />
-                        </div>
-                        <div className="flex-1 w-full">
-                            <ProfileForm profile={profile} />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Billing Address */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Billing Address</CardTitle>
-                    <CardDescription>
-                        Address used for invoices.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <BillingAddress
-                        billingAddress={{
-                            billing_street_address: profile.billing_street_address,
-                            billing_city: profile.billing_city,
-                            billing_postal_code: profile.billing_postal_code,
-                            billing_country: profile.billing_country
-                        }}
-                        mainAddress={{
-                            street_address: profile.street_address,
-                            city: profile.city,
-                            postal_code: profile.postal_code,
-                            country: profile.country
-                        }}
-                    />
-                </CardContent>
-            </Card>
-
-            {/* Security */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Security</CardTitle>
-                    <CardDescription>
-                        Update your password to keep your account secure.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <PasswordForm />
-                </CardContent>
-            </Card>
-        </div>
+        <SettingsView
+            user={user}
+            avatarUrl={avatarUrl}
+            profile={profile}
+            onAvatarUpdate={handleAvatarUpdate}
+        />
     )
 }

@@ -9,7 +9,7 @@ export function ClientSidebar() {
     const links = [
         { title: t.sidebar.dashboard, href: '/dashboard', icon: LayoutDashboard },
         { title: t.sidebar.projects, href: '/projects', icon: Folder },
-        { title: t.sidebar.tasks, href: '/tasks', icon: Inbox },
+        { title: t.sidebar.requests, href: '/requests', icon: Inbox },
         { title: t.sidebar.documents, href: '/documents', icon: Files },
         { title: t.sidebar.invoices, href: '/invoices', icon: FileText },
     ];

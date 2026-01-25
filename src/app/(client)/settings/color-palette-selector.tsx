@@ -8,10 +8,10 @@ import { useLanguage } from "@/contexts/language-context";
 import { Label } from "@/components/ui/label";
 
 const PALETTES: { id: ThemeColor; color: string }[] = [
-    { id: "horizon", color: "#4318ff" }, // Indigo
+    { id: "horizon", color: "#0c1629" }, // Deep Blue (Dark Card Background)
     { id: "sunset", color: "#f97316" },  // Orange
-    { id: "forest", color: "#10b981" },  // Green
-    { id: "minimal", color: "#18181b" }, // Black
+    { id: "forest", color: "#3C3D37" },  // Forest Green
+    { id: "neutral", color: "#DFD0B8" }, // Neutral (Beige)
 ];
 
 export function ColorPaletteSelector() {

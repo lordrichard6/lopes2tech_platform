@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
 import { updateClientProfile } from "./actions"
-// import { ColorPaletteSelector } from "./color-palette-selector"
+import { useLanguage } from "@/contexts/language-context"
+import { ColorPaletteSelector } from "./color-palette-selector"
 
 // Common timezones
 const TIMEZONES = [
@@ -43,6 +44,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
+    const { t } = useLanguage()
     const [saving, setSaving] = useState(false)
     const [formData, setFormData] = useState({
         company_name: profile.company_name || '',
@@ -86,11 +88,11 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             {/* Personal Info - Read Only */}
             <div className="grid md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label>Full Name</Label>
+                    <Label>{t.settings.form.fullName}</Label>
                     <Input value={profile.name} disabled readOnly className="bg-muted" />
                 </div>
                 <div className="grid gap-2">
-                    <Label>Email</Label>
+                    <Label>{t.settings.form.email}</Label>
                     <Input value={profile.contact_email} disabled readOnly className="bg-muted" />
                 </div>
             </div>
@@ -98,7 +100,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             {/* Editable Fields */}
             <div className="grid md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="company_name">Company</Label>
+                    <Label htmlFor="company_name">{t.settings.form.company}</Label>
                     <Input
                         id="company_name"
                         value={formData.company_name}
@@ -107,7 +109,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">{t.settings.form.phone}</Label>
                     <Input
                         id="phone"
                         value={formData.phone}
@@ -120,7 +122,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             {/* Communication */}
             <div className="grid md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="secondary_email">Secondary Email</Label>
+                    <Label htmlFor="secondary_email">{t.settings.form.secondaryEmail}</Label>
                     <Input
                         id="secondary_email"
                         type="email"
@@ -130,7 +132,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+                    <Label htmlFor="whatsapp_number">{t.settings.form.whatsapp}</Label>
                     <Input
                         id="whatsapp_number"
                         value={formData.whatsapp_number}
@@ -144,10 +146,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
             {/* Address Section */}
             <div className="space-y-4">
-                <h4 className="text-sm font-medium text-muted-foreground">Address</h4>
+                <h4 className="text-sm font-medium text-muted-foreground">{t.settings.form.address}</h4>
                 <div className="grid gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="street_address">Street Address</Label>
+                        <Label htmlFor="street_address">{t.settings.form.street}</Label>
                         <Input
                             id="street_address"
                             value={formData.street_address}
@@ -157,7 +159,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="city">City</Label>
+                            <Label htmlFor="city">{t.settings.form.city}</Label>
                             <Input
                                 id="city"
                                 value={formData.city}
@@ -166,7 +168,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="postal_code">Postal Code</Label>
+                            <Label htmlFor="postal_code">{t.settings.form.zip}</Label>
                             <Input
                                 id="postal_code"
                                 value={formData.postal_code}
@@ -175,7 +177,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="country">Country</Label>
+                            <Label htmlFor="country">{t.settings.form.country}</Label>
                             <Input
                                 id="country"
                                 value={formData.country}
@@ -191,10 +193,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
             {/* Preferences */}
             <div className="space-y-4">
-                <h4 className="text-sm font-medium text-muted-foreground">Preferences</h4>
+                <h4 className="text-sm font-medium text-muted-foreground">{t.settings.form.preferences}</h4>
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="preferred_language">Preferred Language</Label>
+                        <Label htmlFor="preferred_language">{t.settings.form.language}</Label>
                         <Select
                             value={formData.preferred_language}
                             onValueChange={(value) => handleChange('preferred_language', value)}
@@ -211,7 +213,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                         </Select>
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="timezone">Timezone</Label>
+                        <Label htmlFor="timezone">{t.settings.form.timezone}</Label>
                         <Select
                             value={formData.timezone}
                             onValueChange={(value) => handleChange('timezone', value)}
@@ -233,13 +235,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
             <Separator />
 
-            {/* Theme Settings - Temporarily Disabled via User Request */}
-            {/* <ColorPaletteSelector /> */}
+            {/* Theme Settings */}
+            <ColorPaletteSelector />
 
             <div className="flex justify-end pt-4">
                 <Button type="submit" disabled={saving} className="gap-2">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    {saving ? 'Saving...' : 'Save Changes'}
+                    {saving ? t.settings.saving : t.settings.saveChanges}
                 </Button>
             </div>
         </form >

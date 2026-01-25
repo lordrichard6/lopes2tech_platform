@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-export default async function TaskDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
 
@@ -38,7 +38,7 @@ export default async function TaskDetailsPage({ params }: { params: Promise<{ id
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div className="mb-6">
-                <Link href="/tasks" className="text-sm text-muted-foreground hover:underline">
+                <Link href="/requests" className="text-sm text-muted-foreground hover:underline">
                     ← Back to Requests
                 </Link>
             </div>

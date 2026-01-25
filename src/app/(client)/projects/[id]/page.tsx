@@ -6,34 +6,27 @@ export default async function ClientProjectDetailsPage({ params }: { params: Pro
     const { id } = await params;
     const supabase = await createClient();
 
-    // Fetch Project (RLS protected)
-    const { data: project } = await supabase
+    // Fetch project details
+    const { data: project, error } = await supabase
         .from("projects")
-        .select("*, clients(name)")
+        .select(`
+            *,
+            clients(name),
+            milestones:milestones(*),
+            invoices:invoices(*),
+            links:project_links(*)
+        `)
         .eq("id", id)
         .single();
 
     if (!project) return notFound();
 
-    // Fetch Milestones
-    const { data: milestones } = await supabase
-        .from("milestones")
-        .select("*")
-        .eq("project_id", id)
-        .order("due_date", { ascending: true });
-
-    // Fetch Invoices (for budget calc)
-    // RLS will ensure we only see invoices for this user/client
-    const { data: invoices } = await supabase
-        .from("invoices")
-        .select("amount, amount_paid, status")
-        .eq("project_id", id);
-
     return (
         <ProjectDashboard
             project={project}
-            milestones={milestones || []}
-            invoices={invoices || []}
+            milestones={project.milestones}
+            invoices={project.invoices}
+            links={project.links || []}
         />
     );
 }
