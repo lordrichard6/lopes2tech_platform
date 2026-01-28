@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
         // Log the activity
         await logActivity({
             action: 'create_ticket',
-            entity_type: 'ticket',
-            entity_id: data.id,
-            details: {
+            entityType: 'ticket',
+            entityId: data.id,
+            metadata: {
                 name: validatedData.name,
                 email: validatedData.email,
                 source: validatedData.source

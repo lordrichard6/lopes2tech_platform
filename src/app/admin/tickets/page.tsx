@@ -30,6 +30,7 @@ interface Ticket {
     status: 'new' | 'in_progress' | 'resolved' | 'closed';
     priority: 'low' | 'medium' | 'high';
     context: string;
+    source?: string;
 }
 
 export default function TicketsPage() {
