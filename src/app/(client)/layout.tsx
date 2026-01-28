@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ClientSidebar } from "@/components/layout/client-sidebar";
 import { DashboardUserMenu } from "@/components/layout/dashboard-user-menu";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageProvider } from "@/contexts/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -58,7 +57,6 @@ export default async function DashboardLayout({
                             <div className="flex items-center gap-3 h-full">
                                 <LanguageSwitcher />
                                 <NotificationBell />
-                                <ThemeToggle />
                                 <DashboardUserMenu
                                     email={user.email || ''}
                                     avatarUrl={avatarUrl}

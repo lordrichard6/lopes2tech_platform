@@ -117,179 +117,208 @@ export function InvoiceDefaultsForm({ settings }: InvoiceDefaultsFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="default_tax_rate"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Default Tax Rate (%)</FormLabel>
-                                <FormControl>
-                                    <Input type="number" step="0.1" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="default_currency"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Currency</FormLabel>
-                                <FormControl>
-                                    <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </div>
+                <div className="grid gap-6 lg:grid-cols-2">
+                    {/* Left column: Invoice + Proposal */}
+                    <div className="space-y-6">
+                        {/* Invoice defaults */}
+                        <div className="space-y-4">
+                            <div>
+                                <div className="text-lg font-medium">Invoice Defaults</div>
+                                <div className="text-sm text-muted-foreground">Defaults used when creating new invoices.</div>
+                            </div>
 
-                <FormField
-                    control={form.control}
-                    name="default_payment_terms"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Payment Terms</FormLabel>
-                            <FormControl>
-                                <Input placeholder="e.g. Net 30" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="default_footer_note"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Footer Note</FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Thank you for your business..."
-                                    className="resize-none"
-                                    {...field}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="default_tax_rate"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Default Tax Rate (%)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" step="0.1" className="h-9" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                            </FormControl>
-                            <FormDescription>
-                                Default text to appear at the bottom of invoices.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                <FormField
+                                    control={form.control}
+                                    name="default_currency"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Currency</FormLabel>
+                                            <FormControl>
+                                                <Input className="h-9" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
 
-                <div className="border-t pt-4 mt-6">
-                    <h3 className="text-lg font-medium mb-4">Bank Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="account_holder"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Account Holder</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="bank_name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Bank Name</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        {/* Proposal defaults */}
+                        <div className="space-y-4 border-t pt-6">
+                            <div>
+                                <div className="text-lg font-medium">Proposal Defaults</div>
+                                <div className="text-sm text-muted-foreground">Defaults used for proposals & general communication.</div>
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="default_payment_terms"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Payment Terms</FormLabel>
+                                        <FormControl>
+                                            <Input className="h-9" placeholder="e.g. Net 30" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="default_footer_note"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Footer Note</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Thank you for your business..."
+                                                className="resize-none min-h-[110px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Default text to appear at the bottom of invoices/proposals.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right column: Bank information */}
+                    <div className="space-y-4">
+                        <div>
+                            <div className="text-lg font-medium">Bank Information</div>
+                            <div className="text-sm text-muted-foreground">Payment details shown on invoices.</div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="account_holder"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Account Holder</FormLabel>
+                                        <FormControl><Input className="h-9" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="bank_name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Bank Name</FormLabel>
+                                        <FormControl><Input className="h-9" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
                         <FormField
                             control={form.control}
                             name="iban"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>IBAN</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
+                                    <FormControl><Input className="h-9" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="bic"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>BIC / SWIFT</FormLabel>
-                                    <FormControl><Input {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="qr_iban"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>QR IBAN (Optional)</FormLabel>
-                                    <FormControl><Input placeholder="For Swiss QR Bills" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                </div>
 
-                {/* Creditor Address for QR Bills */}
-                <div className="border-t pt-4 mt-6">
-                    <h3 className="text-lg font-medium mb-4">Creditor Address (for Swiss QR Bills)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="creditor_street"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Street & Number</FormLabel>
-                                    <FormControl><Input placeholder="Musterstrasse 7" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="creditor_zip"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>ZIP Code</FormLabel>
-                                    <FormControl><Input placeholder="8000" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="creditor_city"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>City</FormLabel>
-                                    <FormControl><Input placeholder="Zurich" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="creditor_country"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Country</FormLabel>
-                                    <FormControl><Input placeholder="CH" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="bic"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>BIC / SWIFT</FormLabel>
+                                        <FormControl><Input className="h-9" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="qr_iban"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>QR IBAN (Optional)</FormLabel>
+                                        <FormControl><Input className="h-9" placeholder="For Swiss QR Bills" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        <div className="pt-2 border-t">
+                            <div className="text-sm font-medium mb-3">Creditor Address (Swiss QR Bills)</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="creditor_street"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Street & Number</FormLabel>
+                                            <FormControl><Input className="h-9" placeholder="Musterstrasse 7" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="creditor_zip"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>ZIP Code</FormLabel>
+                                            <FormControl><Input className="h-9" placeholder="8000" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="creditor_city"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>City</FormLabel>
+                                            <FormControl><Input className="h-9" placeholder="Zurich" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="creditor_country"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Country</FormLabel>
+                                            <FormControl><Input className="h-9" placeholder="CH" {...field} /></FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 

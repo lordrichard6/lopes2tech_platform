@@ -1,6 +1,11 @@
 
 import { createClient } from "@/lib/supabase/server"
-import { Clock, User as UserIcon, Calendar, Filter } from "lucide-react"
+import Link from "next/link"
+import { Calendar, ChevronRight, Filter } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
+import { buildActivityVM } from "./activity-model"
 
 export const dynamic = 'force-dynamic'
 
@@ -23,14 +28,14 @@ export default async function ActivityPage() {
         .order('created_at', { ascending: false })
         .limit(50)
 
-    // 2. Fetch User Profiles manually to avoid joining 'auth.users'
+    // 2. Fetch User Profiles (profiles has no email column)
     const userIds = Array.from(new Set(logs?.map(l => l.user_id).filter(Boolean) || []));
     let profilesMap: Record<string, any> = {};
 
     if (userIds.length > 0) {
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, email, full_name')
+            .select('id, full_name, username, avatar_url')
             .in('id', userIds);
 
         profiles?.forEach(p => {
@@ -38,45 +43,7 @@ export default async function ActivityPage() {
         });
     }
 
-    // 3. Map to UI
-    const activities = logs?.map(log => {
-        let description = log.action.replace(/_/g, ' ');
-        // Metadata Enhancement
-        if (log.action === 'create_invoice' && log.metadata?.amount) {
-            description = `Created invoice for CHF ${log.metadata.amount}`;
-        } else if (log.action === 'login') {
-            description = `User logged in`;
-        } else if (log.action === 'payment_received') {
-            description = `Payment received: CHF ${log.metadata?.amount}`;
-        } else if (log.action === 'create_client') {
-            description = `New client: ${log.metadata?.name || 'Unknown'}`;
-        } else if (log.action === 'create_project') {
-            description = `New project: ${log.metadata?.name || 'Unknown'}`;
-        }
-
-        const userProfile = log.user_id ? profilesMap[log.user_id] : null;
-        const userName = userProfile?.full_name ||
-            userProfile?.email?.split('@')[0] ||
-            log.metadata?.email?.split('@')[0] ||
-            (log.user_id ? 'Unknown User' : 'System');
-
-        const userEmail = userProfile?.email || log.metadata?.email;
-        const isSystem = !log.user_id;
-
-        return {
-            id: log.id,
-            description: description.charAt(0).toUpperCase() + description.slice(1),
-            date: new Date(log.created_at),
-            user: {
-                name: userName,
-                email: userEmail,
-                isSystem
-            },
-            type: log.entity_type,
-            meta: log.metadata,
-            ip: log.ip_address
-        }
-    }) || []
+    const activities = (logs || []).map((log: any) => buildActivityVM(log, log.user_id ? profilesMap[log.user_id] : null))
 
     // Formatting date helper
     const formatDate = (date: Date) => {
@@ -85,6 +52,9 @@ export default async function ActivityPage() {
             hour: '2-digit', minute: '2-digit'
         }).format(date);
     }
+
+    const formatDay = (date: Date) =>
+        new Intl.DateTimeFormat('en-CH', { weekday: 'short', month: 'short', day: 'numeric' }).format(date)
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -102,49 +72,87 @@ export default async function ActivityPage() {
                 </button>
             </div>
 
-            <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
-                <div className="p-6">
-                    {/* Timeline Container */}
-                    <div className="relative border-l border-muted ml-3 space-y-8">
-                        {activities.map((activity, index) => (
-                            <div key={activity.id} className="mb-8 ml-6 relative">
-                                {/* Dot */}
-                                <span className={`absolute -left-[31px] flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-background ${activity.user.isSystem ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground'
-                                    }`}>
-                                    {activity.user.isSystem ? <Clock className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
-                                </span>
+            <div className="space-y-4">
+                {activities.length === 0 && (
+                    <div className="py-12 text-center text-muted-foreground border rounded-lg bg-card">
+                        No activity logs found.
+                    </div>
+                )}
 
-                                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-medium leading-none">
-                                            {activity.description}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            by <span className="font-semibold text-foreground">{activity.user.name}</span>
-                                            {activity.user.email && <span className="text-xs opacity-70 ml-1">({activity.user.email})</span>}
-                                        </p>
-                                        {/* Optional Metadata Details */}
-                                        {activity.type === 'invoice' && activity.meta?.amount && (
-                                            <div className="mt-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                                Invoice #{activity.meta?.invoiceId?.split('-')[0] || 'Ref'}
-                                            </div>
-                                        )}
+                {activities.length > 0 && (
+                    <div className="space-y-6">
+                        {Object.entries(
+                            activities.reduce((acc: Record<string, typeof activities>, a) => {
+                                const key = a.when.toDateString()
+                                acc[key] = acc[key] || []
+                                acc[key].push(a)
+                                return acc
+                            }, {})
+                        ).map(([dayKey, dayActivities]) => (
+                            <div key={dayKey} className="space-y-3">
+                                <div className="sticky top-14 z-10 bg-background/80 backdrop-blur px-1">
+                                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                        {formatDay(dayActivities[0]!.when)}
                                     </div>
-                                    <div className="whitespace-nowrap text-sm text-muted-foreground flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        {formatDate(activity.date)}
-                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {dayActivities.map((a) => {
+                                        const Icon = a.icon
+                                        const initials = a.actor.name?.slice(0, 2).toUpperCase() || "U"
+                                        const content = (
+                                            <Card className="p-4 hover:bg-muted/20 transition-colors">
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className={`h-9 w-9 rounded-full flex items-center justify-center ${a.accentClass}`}>
+                                                            <Icon className="h-4 w-4" />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <div className="text-sm font-semibold">{a.title}</div>
+                                                            {a.subtitle && (
+                                                                <div className="text-xs text-muted-foreground">{a.subtitle}</div>
+                                                            )}
+                                                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                    <Avatar className="h-5 w-5">
+                                                                        <AvatarImage src={a.actor.avatarUrl || undefined} />
+                                                                        <AvatarFallback>{initials}</AvatarFallback>
+                                                                    </Avatar>
+                                                                    <span className="font-medium text-foreground">{a.actor.name}</span>
+                                                                </div>
+                                                                {a.chips.map((c, idx) => (
+                                                                    <Badge key={idx} variant="secondary" className="text-[10px]">
+                                                                        {c.label}
+                                                                    </Badge>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="whitespace-nowrap text-xs text-muted-foreground flex items-center gap-1 pt-1">
+                                                        <Calendar className="w-3 h-3" />
+                                                        {formatDate(a.when)}
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        )
+
+                                        return a.href ? (
+                                            <Link key={a.id} href={a.href} className="block">
+                                                <div className="relative">
+                                                    {content}
+                                                    <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-60" />
+                                                </div>
+                                            </Link>
+                                        ) : (
+                                            <div key={a.id}>{content}</div>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         ))}
-
-                        {activities.length === 0 && (
-                            <div className="py-12 text-center text-muted-foreground">
-                                No activity logs found.
-                            </div>
-                        )}
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

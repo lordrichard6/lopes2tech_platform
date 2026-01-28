@@ -63,7 +63,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const themeColor = (cookieStore.get("NEXT_THEME_COLOR")?.value || "horizon") as ThemeColor;
+  // Default palette should match current design (Neutral).
+  const themeColor = (cookieStore.get("NEXT_THEME_COLOR")?.value || "neutral") as ThemeColor;
 
   return (
     <html lang="en" suppressHydrationWarning>

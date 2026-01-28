@@ -14,7 +14,7 @@ const ThemeColorContext = createContext<ThemeColorContextType | undefined>(undef
 
 export function ThemeColorProvider({
     children,
-    defaultTheme = "horizon",
+    defaultTheme = "neutral",
 }: {
     children: React.ReactNode;
     defaultTheme?: ThemeColor;
@@ -26,7 +26,8 @@ export function ThemeColorProvider({
         // Remove known theme attributes to reset
         root.removeAttribute("data-theme-color");
 
-        if (themeColor !== "horizon") {
+        // Don't set attribute for the default palette to keep DOM clean.
+        if (themeColor !== "neutral") {
             root.setAttribute("data-theme-color", themeColor);
         }
     }, [themeColor]);
