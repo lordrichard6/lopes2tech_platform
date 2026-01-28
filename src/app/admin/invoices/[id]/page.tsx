@@ -7,13 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, CreditCard, FileText, Building2, AlertTriangle, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, CreditCard, FileText, Building2, AlertTriangle, ExternalLink, MoreHorizontal, Pencil, Trash2, Phone, MapPin, Hash } from "lucide-react";
 import { DeletePaymentButton } from "./delete-payment-button";
 import { InvoiceActions } from "./invoice-actions";
 import { PaymentScheduleDialog } from "./payment-schedule-dialog";
 import { PaymentScheduleTable } from "./payment-schedule-table";
 import { EditPaymentDialog } from "./edit-payment-dialog";
 import { Button } from "@/components/ui/button";
+import { EditInvoiceItemsDialog } from "./edit-invoice-items-dialog";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,7 +31,22 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .from("invoices")
         .select(`
             *,
-            clients ( name, contact_email ),
+            clients (
+                id,
+                name,
+                company_name,
+                contact_email,
+                phone,
+                street_address,
+                city,
+                postal_code,
+                country,
+                billing_address,
+                billing_city,
+                billing_zip,
+                billing_country,
+                vat_id
+            ),
             projects ( name )
         `)
         .eq("id", id)
@@ -43,6 +59,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         .single();
 
     if (!invoice) return notFound();
+
+    // Fetch invoice line items
+    const { data: invoiceItems } = await supabase
+        .from("invoice_items")
+        .select("*")
+        .eq("invoice_id", id)
+        .order("position", { ascending: true });
 
     // Fetch schedules separately to avoid crashing if table/relation missing
     let schedules: any[] = [];
@@ -152,28 +175,68 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
 
                     {/* Items / Description Card */}
                     <Card>
-                        <CardHeader>
+                        <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle>Invoice Items</CardTitle>
+                            <EditInvoiceItemsDialog
+                                invoiceId={invoice.id}
+                                currency={invoice.currency}
+                                initialItems={(invoiceItems || []) as any[]}
+                                disabled={isPaid || isCancelled}
+                            />
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                <div className="p-4 rounded-lg bg-muted/50 border flex justify-between items-start">
-                                    <div className="space-y-1">
-                                        <div className="font-medium text-base">
-                                            {invoice.description || "Services Rendered"}
-                                        </div>
-                                        {invoice.projects && (
-                                            <Link
-                                                href={`/admin/projects/${invoice.project_id}`}
-                                                className="flex items-center gap-1.5 text-sm text-primary hover:underline"
-                                            >
-                                                <FileText className="h-3.5 w-3.5" />
-                                                <span>Project: {invoice.projects.name}</span>
-                                                <ExternalLink className="h-3 w-3" />
-                                            </Link>
-                                        )}
+                                {invoice.projects && (
+                                    <Link
+                                        href={`/admin/projects/${invoice.project_id}`}
+                                        className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+                                    >
+                                        <FileText className="h-3.5 w-3.5" />
+                                        <span>Project: {invoice.projects.name}</span>
+                                        <ExternalLink className="h-3 w-3" />
+                                    </Link>
+                                )}
+
+                                {(invoiceItems && invoiceItems.length > 0) ? (
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Item</TableHead>
+                                                    <TableHead className="text-right">Qty</TableHead>
+                                                    <TableHead className="text-right">Unit</TableHead>
+                                                    <TableHead className="text-right">Total</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {invoiceItems.map((it: any) => (
+                                                    <TableRow key={it.id}>
+                                                        <TableCell>
+                                                            <div className="font-medium">{it.name}</div>
+                                                            {it.description && (
+                                                                <div className="text-xs text-muted-foreground">{it.description}</div>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="text-right">{Number(it.quantity).toFixed(0)}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            {invoice.currency} {Number(it.unit_price).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-medium">
+                                                            {invoice.currency} {Number(it.line_total ?? (it.quantity * it.unit_price)).toFixed(2)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
                                     </div>
-                                    <div className="font-semibold text-lg">
+                                ) : (
+                                    <div className="p-4 rounded-lg bg-muted/30 border text-sm text-muted-foreground">
+                                        {invoice.description || "No items found. Add items to see them here."}
+                                    </div>
+                                )}
+
+                                <div className="flex justify-end">
+                                    <div className="text-lg font-semibold">
                                         {invoice.currency} {invoice.amount.toLocaleString()}
                                     </div>
                                 </div>
@@ -356,20 +419,71 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-start gap-3">
-                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <Building2 className="h-5 w-5 text-primary" />
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="font-semibold text-base">{invoice.clients?.name}</div>
-                                    <div className="text-sm text-muted-foreground break-all">
-                                        {invoice.clients?.contact_email}
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <Building2 className="h-5 w-5 text-primary" />
                                     </div>
-                                    <Link href={`/admin/clients/${invoice.client_id}`} className="text-xs text-primary hover:underline inline-flex items-center gap-1 pt-1">
-                                        View Client Profile
-                                        <ExternalLink className="h-3 w-3" />
-                                    </Link>
+                                    <div className="flex-1 space-y-1">
+                                        {invoice.clients?.company_name && (
+                                            <div className="font-semibold text-base">{invoice.clients.company_name}</div>
+                                        )}
+                                        <div className="font-semibold text-base">{invoice.clients?.name}</div>
+                                        {invoice.clients?.contact_email && (
+                                            <div className="text-sm text-muted-foreground break-all">
+                                                {invoice.clients.contact_email}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Billing Address */}
+                                {(invoice.clients?.billing_address || invoice.clients?.street_address) && (
+                                    <div className="space-y-1 pt-2 border-t">
+                                        <div className="flex items-start gap-2 text-sm">
+                                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                            <div className="text-muted-foreground">
+                                                {invoice.clients.billing_address || invoice.clients.street_address}
+                                                <br />
+                                                {[
+                                                    invoice.clients.billing_zip || invoice.clients.postal_code,
+                                                    invoice.clients.billing_city || invoice.clients.city
+                                                ].filter(Boolean).join(' ')}
+                                                {invoice.clients.billing_country || invoice.clients.country ? (
+                                                    <>, {invoice.clients.billing_country || invoice.clients.country}</>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Phone & VAT ID */}
+                                {(invoice.clients?.phone || invoice.clients?.vat_id) && (
+                                    <div className="space-y-1.5 pt-2 border-t">
+                                        {invoice.clients?.phone && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                <span className="text-muted-foreground">{invoice.clients.phone}</span>
+                                            </div>
+                                        )}
+                                        {invoice.clients?.vat_id && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Hash className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                <span className="text-muted-foreground font-mono text-xs">
+                                                    VAT: {invoice.clients.vat_id}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <Link 
+                                    href={`/admin/clients/${invoice.client_id}`} 
+                                    className="text-xs text-primary hover:underline inline-flex items-center gap-1 pt-2 border-t block"
+                                >
+                                    View Client Profile
+                                    <ExternalLink className="h-3 w-3" />
+                                </Link>
                             </div>
                         </CardContent>
                     </Card>

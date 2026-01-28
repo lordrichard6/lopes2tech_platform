@@ -1,5 +1,3 @@
-'use server';
-
 import { createClient } from "@/lib/supabase/server";
 import { Link2, Trash2, Github, Figma, Trello, Slack, File, Globe, Server, Database, Image, Video, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";

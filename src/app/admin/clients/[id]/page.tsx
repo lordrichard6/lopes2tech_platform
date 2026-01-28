@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "../status-badge";
 import { format } from "date-fns";
 import Link from "next/link";
-import { ArrowLeft, Mail, Calendar, FileText, Layers, FolderKanban, Plus } from "lucide-react";
+import { ArrowLeft, Mail, Calendar, FileText, Layers, FolderKanban, Plus, Phone, Building2, MapPin, Globe, Languages } from "lucide-react";
+import { EditClientDialog } from "./edit-client-dialog";
 import { UploadDocument } from "./upload-document";
 import { DocumentRow } from "./document-row";
 import { SubscriptionsCard } from "./subscriptions-card";
@@ -159,7 +160,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline">Edit Client</Button>
+                    <EditClientDialog client={client} />
                 </div>
             </div>
 
@@ -186,17 +187,86 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                                 <CardHeader>
                                     <CardTitle>Contact Details</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                <CardContent className="space-y-3">
+                                    {client.company_name && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                            <span className="font-medium">{client.company_name}</span>
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-2 text-sm">
-                                        <Mail className="h-4 w-4 text-muted-foreground" />
+                                        <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                         <span>{client.contact_email || "No email"}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        <span>Joined {format(new Date(client.created_at), "PPP")}</span>
+                                    {client.phone && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                            <span>{client.phone}</span>
+                                        </div>
+                                    )}
+                                    {client.website && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                            <a href={client.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                                {client.website.replace(/^https?:\/\//, '')}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {(client.street_address || client.city) && (
+                                        <div className="flex items-start gap-2 text-sm">
+                                            <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                                            <div className="text-muted-foreground">
+                                                {client.street_address && <div>{client.street_address}</div>}
+                                                <div>
+                                                    {[client.postal_code, client.city].filter(Boolean).join(' ')}
+                                                    {client.country && `, ${client.country}`}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {client.preferred_language && (
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Languages className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                            <span className="text-muted-foreground capitalize">
+                                                {client.preferred_language === 'en' ? 'English' :
+                                                 client.preferred_language === 'de' ? 'German' :
+                                                 client.preferred_language === 'pt' ? 'Portuguese' :
+                                                 client.preferred_language === 'fr' ? 'French' : client.preferred_language}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2 text-sm pt-2 border-t">
+                                        <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                        <span className="text-muted-foreground">Joined {format(new Date(client.created_at), "PPP")}</span>
                                     </div>
                                 </CardContent>
                             </Card>
+
+                            {/* Billing Info Card */}
+                            {(client.vat_id || client.billing_address) && (
+                                <Card className="h-fit">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-base">Billing Info</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2 text-sm">
+                                        {client.vat_id && (
+                                            <div>
+                                                <span className="text-muted-foreground">VAT ID: </span>
+                                                <span className="font-mono">{client.vat_id}</span>
+                                            </div>
+                                        )}
+                                        {client.billing_address && (
+                                            <div className="text-muted-foreground">
+                                                <div>{client.billing_address}</div>
+                                                <div>
+                                                    {[client.billing_zip, client.billing_city].filter(Boolean).join(' ')}
+                                                    {client.billing_country && `, ${client.billing_country}`}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
                         </div>
 
                         {/* Main Content Areas */}

@@ -85,7 +85,13 @@ export function AddLinkDialog({ projectId }: { projectId: string }) {
                         Add a link to external resources for this project.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={handleSubmit}>
+                <form
+                    onSubmit={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        await handleSubmit(formData);
+                    }}
+                >
                     <input type="hidden" name="projectId" value={projectId} />
                     <input type="hidden" name="icon" value={selectedIcon} />
 

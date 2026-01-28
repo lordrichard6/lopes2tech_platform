@@ -130,11 +130,38 @@ export async function createInvoiceAction(formData: FormData) {
     const clientId = formData.get('clientId') as string
     const projectId = formData.get('projectId') as string
     const amount = formData.get('amount') as string
+    const currency = formData.get('currency') as string || 'CHF'
     const description = formData.get('description') as string
     const dueDate = formData.get('dueDate') as string
+    const itemsJson = formData.get('items') as string // JSON string of line items
 
     if (!clientId || !amount) {
         return { error: 'Client and Amount are required' }
+    }
+
+    const issueDate = new Date().toISOString().split('T')[0];
+    const invoiceNumber = formData.get('invoiceNumber') as string || `INV-${Date.now().toString(36).toUpperCase()}`;
+
+    // Parse items if provided
+    let items: any[] = [];
+    if (itemsJson) {
+        try {
+            items = JSON.parse(itemsJson);
+        } catch (e) {
+            console.error('Failed to parse items:', e);
+        }
+    }
+
+    // If no items provided, create a default item from description
+    if (items.length === 0 && description) {
+        items = [{
+            name: description,
+            description: null,
+            quantity: 1,
+            price: parseFloat(amount),
+            unitLabel: 'unit',
+            type: 'item'
+        }];
     }
 
     const { data: invoice, error } = await supabase
@@ -143,15 +170,55 @@ export async function createInvoiceAction(formData: FormData) {
             client_id: clientId,
             project_id: projectId || null,
             amount: parseFloat(amount),
-            description,
+            currency,
+            description: description || 'Invoice',
             status: 'pending',
-            due_date: dueDate || null
+            due_date: dueDate || null,
+            invoice_number: invoiceNumber,
+            issue_date: issueDate,
+            net_amount: parseFloat(amount),
+            tax_amount: 0,
+            gross_amount: parseFloat(amount)
         })
         .select('id')
         .single()
 
     if (error) {
         return { error: error.message }
+    }
+
+    // Insert invoice line items
+    if (invoice && items.length > 0) {
+        const invoiceItems = items.map((item, index) => {
+            const quantity = Number(item.quantity) || 0;
+            const unitPrice = Number(item.price) || 0;
+            const subtotal = quantity * unitPrice;
+            return {
+                invoice_id: invoice.id,
+                position: index + 1,
+                type: item.type || (item.service_id ? 'service' : 'item'),
+                name: item.name || 'Item',
+                description: item.description || null,
+                service_id: item.service_id || null,
+                quantity,
+                unit_label: item.unitLabel || null,
+                unit_price: unitPrice,
+                discount_percent: null,
+                tax_rate_percent: null,
+                line_subtotal: subtotal,
+                line_discount_amount: null,
+                line_tax_amount: 0,
+                line_total: subtotal
+            };
+        });
+
+        const { error: itemsError } = await supabase
+            .from('invoice_items')
+            .insert(invoiceItems);
+
+        if (itemsError) {
+            console.error('Failed to create invoice items:', itemsError);
+        }
     }
 
     if (invoice) {

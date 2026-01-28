@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,20 +19,13 @@ interface PortalAccessCardProps {
     profileId: string | null; // If present, account works
 }
 
-function SubmitButton({ children, text }: { children: React.ReactNode, text: string }) {
-    const { pending } = useFormStatus();
-    return (
-        <Button type="submit" disabled={pending}>
-            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {pending ? text : children}
-        </Button>
-    );
-}
-
 export function PortalAccessCard({ clientId, clientName, clientEmail, profileId }: PortalAccessCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isEmailOpen, setIsEmailOpen] = useState(false);
     const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [isEnabling, setIsEnabling] = useState(false);
 
     if (profileId) {
         return (
@@ -77,15 +69,21 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                                         </DialogDescription>
                                     </DialogHeader>
 
-                                    <form action={async (formData) => {
-                                        const result = await resetClientPasswordAction(formData);
-                                        if (result?.error) {
-                                            toast.error(result.error);
-                                        } else {
-                                            toast.success("Password reset successfully!");
-                                            setIsPasswordOpen(false);
-                                        }
-                                    }}>
+                                    <form
+                                        onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            setIsResetting(true);
+                                            const formData = new FormData(e.currentTarget);
+                                            const result = await resetClientPasswordAction(formData);
+                                            if (result?.error) {
+                                                toast.error(result.error);
+                                            } else {
+                                                toast.success("Password reset successfully!");
+                                                setIsPasswordOpen(false);
+                                            }
+                                            setIsResetting(false);
+                                        }}
+                                    >
                                         <input type="hidden" name="clientId" value={clientId} />
                                         <input type="hidden" name="profileId" value={profileId || ''} />
 
@@ -108,7 +106,10 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                                         </div>
 
                                         <DialogFooter>
-                                            <SubmitButton text="Resetting...">Reset Password</SubmitButton>
+                                            <Button type="submit" disabled={isResetting}>
+                                                {isResetting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Reset Password
+                                            </Button>
                                         </DialogFooter>
                                     </form>
                                 </DialogContent>
@@ -144,15 +145,21 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                                         </DialogDescription>
                                     </DialogHeader>
 
-                                    <form action={async (formData) => {
-                                        const result = await sendWelcomeEmailAction(formData);
-                                        if (result?.error) {
-                                            toast.error(result.error);
-                                        } else {
-                                            toast.success("Welcome email sent successfully!");
-                                            setIsEmailOpen(false);
-                                        }
-                                    }}>
+                                    <form
+                                        onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            setIsSendingEmail(true);
+                                            const formData = new FormData(e.currentTarget);
+                                            const result = await sendWelcomeEmailAction(formData);
+                                            if (result?.error) {
+                                                toast.error(result.error);
+                                            } else {
+                                                toast.success("Welcome email sent successfully!");
+                                                setIsEmailOpen(false);
+                                            }
+                                            setIsSendingEmail(false);
+                                        }}
+                                    >
                                         <input type="hidden" name="clientId" value={clientId} />
 
                                         <div className="grid gap-4 py-4">
@@ -172,7 +179,10 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                                         </div>
 
                                         <DialogFooter>
-                                            <SubmitButton text="Sending...">Send Email</SubmitButton>
+                                            <Button type="submit" disabled={isSendingEmail}>
+                                                {isSendingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Send Email
+                                            </Button>
                                         </DialogFooter>
                                     </form>
                                 </DialogContent>
@@ -220,15 +230,21 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                             </DialogDescription>
                         </DialogHeader>
 
-                        <form action={async (formData) => {
-                            const result = await enablePortalAccessAction(formData);
-                            if (result?.error) {
-                                toast.error(result.error);
-                            } else {
-                                toast.success("Portal access enabled!");
-                                setIsOpen(false);
-                            }
-                        }}>
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                setIsEnabling(true);
+                                const formData = new FormData(e.currentTarget);
+                                const result = await enablePortalAccessAction(formData);
+                                if (result?.error) {
+                                    toast.error(result.error);
+                                } else {
+                                    toast.success("Portal access enabled!");
+                                    setIsOpen(false);
+                                }
+                                setIsEnabling(false);
+                            }}
+                        >
                             <input type="hidden" name="clientId" value={clientId} />
 
                             <div className="grid gap-4 py-4">
@@ -259,7 +275,10 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                             </div>
 
                             <DialogFooter>
-                                <SubmitButton text="Enabling...">Enable Access</SubmitButton>
+                                <Button type="submit" disabled={isEnabling}>
+                                    {isEnabling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Enable Access
+                                </Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>

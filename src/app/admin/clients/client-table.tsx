@@ -6,10 +6,13 @@ import {
     Search,
     MoreHorizontal,
     Users,
-    Sparkles,
-    Hammer,
-    Rocket,
-    ShieldCheck,
+    CircleDashed,
+    Target,
+    FileText,
+    UserCheck,
+    Crown,
+    PauseCircle,
+    UserX,
     LayoutGrid,
     List
 } from "lucide-react";
@@ -97,16 +100,24 @@ export function ClientTable({ data }: ClientTableProps) {
 
     const getStatusConfig = (status: string | null) => {
         const s = (status || "").toLowerCase();
-        if (s === "lead") {
-            return { icon: Sparkles, label: "Lead", color: "text-yellow-500" };
-        } else if (s === "dev" || s === "in_development") {
-            return { icon: Hammer, label: "In Development", color: "text-blue-500" };
-        } else if (s === "active" || s === "done") {
-            return { icon: Rocket, label: "Active", color: "text-green-500" };
-        } else if (s === "maintenance") {
-            return { icon: ShieldCheck, label: "Maintenance", color: "text-orange-500" };
+        switch (s) {
+            case "lead":
+                return { icon: CircleDashed, label: "Lead", color: "text-gray-500" };
+            case "qualified":
+                return { icon: Target, label: "Qualified", color: "text-blue-500" };
+            case "proposal":
+                return { icon: FileText, label: "Proposal", color: "text-yellow-500" };
+            case "client":
+                return { icon: UserCheck, label: "Client", color: "text-green-500" };
+            case "vip":
+                return { icon: Crown, label: "VIP", color: "text-purple-500" };
+            case "inactive":
+                return { icon: PauseCircle, label: "Inactive", color: "text-orange-500" };
+            case "churned":
+                return { icon: UserX, label: "Churned", color: "text-red-500" };
+            default:
+                return { icon: Users, label: status || "Unknown", color: "text-muted-foreground" };
         }
-        return { icon: Users, label: status || "Unknown", color: "text-muted-foreground" };
     };
 
     const getAvatarUrl = (url?: string | null) => {

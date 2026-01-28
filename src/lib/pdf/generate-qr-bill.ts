@@ -36,6 +36,9 @@ export function generateSwissQRRaw(data: SwissQRBillData): SVGElement {
         const creditorAddr = parseAddress(data.creditor.address);
         const debtorAddr = parseAddress(data.debtor.address);
 
+        // Ensure country codes are valid 2-character ISO codes
+        const validateCountry = (country: string | undefined | null): string => 
+            (country && country.length === 2) ? country.toUpperCase() : 'CH';
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const qrData: any = {
@@ -44,17 +47,17 @@ export function generateSwissQRRaw(data: SwissQRBillData): SVGElement {
             creditor: {
                 name: data.creditor.name,
                 account: data.creditor.account,
-                address: creditorAddr.street,
+                address: creditorAddr.street || 'Musterstrasse 1',
                 zip: parseInt(data.creditor.zip) || 8000,
-                city: data.creditor.city,
-                country: data.creditor.country
+                city: data.creditor.city || 'Zurich',
+                country: validateCountry(data.creditor.country)
             },
             debtor: {
                 name: data.debtor.name,
-                address: debtorAddr.street,
+                address: debtorAddr.street || 'Musterstrasse 1',
                 zip: parseInt(data.debtor.zip) || 8000,
-                city: data.debtor.city,
-                country: data.debtor.country
+                city: data.debtor.city || 'Zurich',
+                country: validateCountry(data.debtor.country)
             }
         };
 

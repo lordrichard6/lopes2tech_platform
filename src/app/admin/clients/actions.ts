@@ -62,6 +62,71 @@ export async function createClientAction(formData: FormData) {
     redirect('/admin/clients')
 }
 
+const updateClientSchema = z.object({
+    id: z.string().uuid(),
+    name: z.string().min(1, 'Name is required'),
+    company_name: z.string().optional().nullable(),
+    contact_email: z.string().email('Invalid email address').optional().or(z.literal('')).nullable(),
+    phone: z.string().optional().nullable(),
+    street_address: z.string().optional().nullable(),
+    city: z.string().optional().nullable(),
+    postal_code: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
+    billing_address: z.string().optional().nullable(),
+    billing_city: z.string().optional().nullable(),
+    billing_zip: z.string().optional().nullable(),
+    billing_country: z.string().optional().nullable(),
+    vat_id: z.string().optional().nullable(),
+    website: z.string().optional().nullable(),
+    status: z.string().optional().nullable(),
+    preferred_language: z.string().optional().nullable(),
+})
+
+export async function updateClientAction(data: z.infer<typeof updateClientSchema>) {
+    const { supabase } = await requireAdmin()
+
+    const valResult = updateClientSchema.safeParse(data)
+    if (!valResult.success) {
+        const errorMessage = valResult.error.issues.map(e => e.message).join(', ')
+        return { error: errorMessage }
+    }
+
+    const { id, ...updateData } = valResult.data
+
+    // Clean up empty strings to null
+    const cleanedData = Object.fromEntries(
+        Object.entries(updateData).map(([key, value]) => [
+            key,
+            value === '' ? null : value
+        ])
+    )
+
+    const { error } = await supabase
+        .from('clients')
+        .update(cleanedData)
+        .eq('id', id)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    // Log Activity
+    const { logActivity } = await import('@/lib/activity')
+    const { data: { user } } = await supabase.auth.getUser()
+
+    await logActivity({
+        userId: user?.id,
+        action: 'update_client',
+        entityType: 'client',
+        entityId: id,
+        metadata: { changes: Object.keys(cleanedData) }
+    })
+
+    revalidatePath(`/admin/clients/${id}`)
+    revalidatePath('/admin/clients')
+    return { success: true }
+}
+
 export async function bulkCreateClients(clients: any[]) {
     const { supabase } = await requireAdmin();
 

@@ -7,15 +7,17 @@ import {
 } from "@/components/ui/tooltip";
 import {
     CircleDashed,
-    Code,
-    CheckCircle,
-    Zap,
-    Ghost,
+    Target,
+    FileText,
+    UserCheck,
+    Crown,
+    PauseCircle,
+    UserX,
     HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ClientStatus = 'lead' | 'pre-approval' | 'in-development' | 'completed' | 'maintenance' | 'inactive' | 'churned';
+type ClientStatus = 'lead' | 'qualified' | 'proposal' | 'client' | 'vip' | 'inactive' | 'churned';
 
 interface StatusBadgeProps {
     status: ClientStatus | string;
@@ -25,44 +27,44 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; de
     'lead': {
         label: 'Lead',
         icon: CircleDashed,
-        color: 'bg-yellow-500/10 text-yellow-600 border-yellow-200 hover:bg-yellow-500/20',
-        description: 'Potential client, initial contact made.'
+        color: 'bg-gray-500/10 text-gray-600 border-gray-200 hover:bg-gray-500/20',
+        description: 'New contact, exploring interest.'
     },
-    'pre-approval': {
-        label: 'Pre-Approval',
-        icon: CircleDashed,
-        color: 'bg-yellow-500/10 text-yellow-600 border-yellow-200 hover:bg-yellow-500/20',
-        description: 'Offer sent, awaiting approval.'
-    },
-    'in-development': {
-        label: 'In Development',
-        icon: Code,
+    'qualified': {
+        label: 'Qualified',
+        icon: Target,
         color: 'bg-blue-500/10 text-blue-600 border-blue-200 hover:bg-blue-500/20',
-        description: 'Project is currently being built.'
+        description: 'Qualified lead, showing genuine interest.'
     },
-    'completed': {
-        label: 'Completed',
-        icon: CheckCircle,
+    'proposal': {
+        label: 'Proposal',
+        icon: FileText,
+        color: 'bg-yellow-500/10 text-yellow-600 border-yellow-200 hover:bg-yellow-500/20',
+        description: 'Quote or proposal sent, awaiting decision.'
+    },
+    'client': {
+        label: 'Client',
+        icon: UserCheck,
         color: 'bg-green-500/10 text-green-600 border-green-200 hover:bg-green-500/20',
-        description: 'Project finished and delivered.'
+        description: 'Active paying customer.'
     },
-    'maintenance': {
-        label: 'Maintenance',
-        icon: Zap,
-        color: 'bg-orange-500/10 text-orange-600 border-orange-200 hover:bg-orange-500/20',
-        description: 'Active maintenance contract.'
+    'vip': {
+        label: 'VIP',
+        icon: Crown,
+        color: 'bg-purple-500/10 text-purple-600 border-purple-200 hover:bg-purple-500/20',
+        description: 'High-value or long-term client.'
     },
     'inactive': {
         label: 'Inactive',
-        icon: Ghost,
-        color: 'bg-gray-500/10 text-gray-600 border-gray-200 hover:bg-gray-500/20',
-        description: 'No active projects or maintenance.'
+        icon: PauseCircle,
+        color: 'bg-orange-500/10 text-orange-600 border-orange-200 hover:bg-orange-500/20',
+        description: 'No active services, relationship intact.'
     },
     'churned': {
         label: 'Churned',
-        icon: Ghost,
+        icon: UserX,
         color: 'bg-red-500/10 text-red-600 border-red-200 hover:bg-red-500/20',
-        description: 'Client left or cancelled.'
+        description: 'Lost client, relationship ended.'
     }
 };
 

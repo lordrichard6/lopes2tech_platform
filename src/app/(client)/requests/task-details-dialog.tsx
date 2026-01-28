@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -19,7 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cancelTaskAction, updateTaskAction } from "./actions";
 import { updateTaskStatusAction } from "./[id]/actions";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Pencil, X, Check } from "lucide-react";
 
@@ -36,11 +36,17 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isPending, setIsPending] = useState(false);
 
-    // Helper to wrap server action
-    const wrapAction = (action: (fd: FormData) => Promise<any>) => async (formData: FormData) => {
+    const toggleEdit = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsEditing(!isEditing);
+    };
+
+    const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         setIsPending(true);
         try {
-            const result = await action(formData);
+            const formData = new FormData(e.currentTarget);
+            const result = await updateTaskAction(formData);
             if (result?.success) {
                 setIsEditing(false);
                 setOpen(false);
@@ -52,9 +58,36 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
         }
     };
 
-    const toggleEdit = (e: React.MouseEvent) => {
+    const handleCancelSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setIsEditing(!isEditing);
+        setIsPending(true);
+        try {
+            const formData = new FormData(e.currentTarget);
+            const result = await cancelTaskAction(formData);
+            if (result?.success) {
+                setOpen(false);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsPending(false);
+        }
+    };
+
+    const handleStatusSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsPending(true);
+        try {
+            const formData = new FormData(e.currentTarget);
+            const result = await updateTaskStatusAction(formData);
+            if (result?.success) {
+                setOpen(false);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsPending(false);
+        }
     };
 
     return (
@@ -97,7 +130,7 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
 
                 <ScrollArea className="max-h-[60vh] pr-4">
                     {isEditing ? (
-                        <form id="edit-form" action={wrapAction(updateTaskAction)} className="space-y-4 py-4">
+                        <form id="edit-form" onSubmit={handleEditSubmit} className="space-y-4 py-4">
                             <input type="hidden" name="taskId" value={task.id} />
                             <div className="space-y-2">
                                 <Label htmlFor="title">{t.requests.dialog.requestTitle}</Label>
@@ -163,7 +196,7 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
                             {task.status === 'requested' && (
                                 <div className="flex w-full justify-between items-center">
                                     <span className="text-xs text-muted-foreground">{t.requests.dialog.waiting}</span>
-                                    <form action={wrapAction(cancelTaskAction)}>
+                                    <form onSubmit={handleCancelSubmit}>
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <Button type="submit" variant="destructive" disabled={isPending} size="sm">
                                             {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -175,14 +208,14 @@ export function TaskDetailsDialog({ task, children }: TaskDetailsDialogProps) {
 
                             {task.status === 'quoted' && (
                                 <div className="flex w-full justify-end gap-2">
-                                    <form action={wrapAction(updateTaskStatusAction)}>
+                                    <form onSubmit={handleStatusSubmit}>
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <input type="hidden" name="status" value="rejected" />
                                         <Button type="submit" variant="destructive" disabled={isPending}>
                                             {t.requests.declineQuote}
                                         </Button>
                                     </form>
-                                    <form action={wrapAction(updateTaskStatusAction)}>
+                                    <form onSubmit={handleStatusSubmit}>
                                         <input type="hidden" name="taskId" value={task.id} />
                                         <input type="hidden" name="status" value="active" />
                                         <Button type="submit" disabled={isPending}>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Copy, Clock, MoreVertical, ExternalLink, FileText, Mail, Loader2, CheckCircle, XCircle, Pencil
+    Copy, Clock, MoreVertical, ExternalLink, FileText, Mail, Loader2, CheckCircle, XCircle, Pencil, Plus
 } from "lucide-react";
 import { pdf } from '@react-pdf/renderer';
 import { OfferPDFDocument } from '@/lib/pdf/offer-template';
@@ -327,6 +327,18 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
 
                         {!isPaid && !isCancelled && (
                             <>
+                                <RecordPaymentDialog
+                                    invoiceId={invoice.id}
+                                    invoiceAmount={invoice.amount}
+                                    amountPaid={invoice.amount_paid || 0}
+                                    currency={invoice.currency}
+                                    trigger={
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Record Payment
+                                        </DropdownMenuItem>
+                                    }
+                                />
                                 <DropdownMenuItem
                                     onClick={handleMarkAsPaid}
                                     disabled={isMarkingPaid}
@@ -374,16 +386,6 @@ export function InvoiceActions({ invoice }: InvoiceActionsProps) {
                         )}
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-                {/* Record Payment - Keep as separate button for quick access */}
-                {!isPaid && !isCancelled && (
-                    <RecordPaymentDialog
-                        invoiceId={invoice.id}
-                        invoiceAmount={invoice.amount}
-                        amountPaid={invoice.amount_paid || 0}
-                        currency={invoice.currency}
-                    />
-                )}
             </div>
 
             {/* Edit Dialog */}

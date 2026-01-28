@@ -14,6 +14,8 @@ import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 import { AddLinkDialog } from "./add-link-dialog";
 import { ProjectLinksList } from "./project-links-list";
+import { AddServiceDialog } from "./add-service-dialog";
+import { RemoveServiceButton } from "./remove-service-button";
 import { cn } from "@/lib/utils";
 
 interface ProjectService {
@@ -48,7 +50,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
         .from("projects")
         .select(`
       *,
-      clients ( name ),
+      clients ( id, name, company_name, contact_email, street_address, city, postal_code, country, billing_address, billing_city, billing_zip, billing_country ),
       project_services (
         service_id,
         services ( * )
@@ -193,14 +195,20 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <Hash className="w-4 h-4 text-muted-foreground" /> Services
                             </CardTitle>
-                            <Badge variant="outline" className="ml-auto font-mono">
-                                Total: CHF {totalServicesCost.toLocaleString()}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="font-mono">
+                                    Total: CHF {totalServicesCost.toLocaleString()}
+                                </Badge>
+                                <AddServiceDialog 
+                                    projectId={project.id} 
+                                    linkedServiceIds={project.project_services?.map((ps: ProjectService) => ps.service_id) || []} 
+                                />
+                            </div>
                         </CardHeader>
                         <CardContent className="grid gap-3">
                             {project.project_services && project.project_services.length > 0 ? (
                                 project.project_services.map((ps: ProjectService) => (
-                                    <div key={ps.service_id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                                    <div key={ps.service_id} className="group flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                                         <div className="space-y-0.5">
                                             <div className="font-medium text-sm">{ps.services?.name}</div>
                                             <div className="text-xs text-muted-foreground capitalize flex items-center gap-1.5">
@@ -208,8 +216,11 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                                                 {ps.services?.billing_type?.replace('_', ' ')}
                                             </div>
                                         </div>
-                                        <div className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
-                                            CHF {ps.services?.price}
+                                        <div className="flex items-center gap-2">
+                                            <div className="text-sm font-semibold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+                                                CHF {ps.services?.price}
+                                            </div>
+                                            <RemoveServiceButton projectId={project.id} serviceId={ps.service_id} />
                                         </div>
                                     </div>
                                 ))

@@ -42,6 +42,7 @@ interface RecordPaymentDialogProps {
     invoiceAmount: number
     amountPaid: number
     currency: string
+    trigger?: React.ReactNode
 }
 
 const formSchema = z.object({
@@ -55,7 +56,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export function RecordPaymentDialog({ invoiceId, invoiceAmount, amountPaid, currency }: RecordPaymentDialogProps) {
+export function RecordPaymentDialog({ invoiceId, invoiceAmount, amountPaid, currency, trigger }: RecordPaymentDialogProps) {
     const [open, setOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,10 +133,12 @@ export function RecordPaymentDialog({ invoiceId, invoiceAmount, amountPaid, curr
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Record Payment
-                </Button>
+                {trigger || (
+                    <Button size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Record Payment
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

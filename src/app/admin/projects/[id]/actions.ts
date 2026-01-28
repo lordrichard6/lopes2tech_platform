@@ -162,6 +162,53 @@ async function updateProjectProgress(projectId: string) {
         .eq('id', projectId)
 }
 
+export async function addServiceToProjectAction(projectId: string, serviceId: string) {
+    const supabase = await createClient()
+
+    // Check if already linked
+    const { data: existing } = await supabase
+        .from('project_services')
+        .select('id')
+        .eq('project_id', projectId)
+        .eq('service_id', serviceId)
+        .single()
+
+    if (existing) {
+        return { error: 'Service already linked to this project' }
+    }
+
+    const { error } = await supabase
+        .from('project_services')
+        .insert({
+            project_id: projectId,
+            service_id: serviceId
+        })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath(`/admin/projects/${projectId}`)
+    return { success: true }
+}
+
+export async function removeServiceFromProjectAction(projectId: string, serviceId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('project_services')
+        .delete()
+        .eq('project_id', projectId)
+        .eq('service_id', serviceId)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath(`/admin/projects/${projectId}`)
+    return { success: true }
+}
+
 export async function deleteProjectAction(formData: FormData) {
     const supabase = await createClient()
     const projectId = formData.get('projectId') as string

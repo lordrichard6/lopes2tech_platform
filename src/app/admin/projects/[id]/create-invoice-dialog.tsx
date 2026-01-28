@@ -46,7 +46,7 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
     }, [open]);
 
     const [currency, setCurrency] = useState<Currency>('CHF');
-    const [selectedItems, setSelectedItems] = useState<Map<string, any>>(new Map()); // Type simplified for now to fix build, ideally InvoiceItem
+    const [selectedItems, setSelectedItems] = useState<Map<string, any>>(new Map()); // Map<serviceIdOrCustomId, { service, quantity, customPrice? }>
     const [notes, setNotes] = useState('');
     const [dueDate, setDueDate] = useState<string>(() => {
         // Safe access to client-side only objects if needed, but format/addDays are fine
@@ -66,33 +66,45 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
 
     const today = format(new Date(), 'dd/MM/yyyy');
 
-    // Pre-fill services from project when opening
-    useEffect(() => {
-        if (open && project.project_services) {
-            const initialItems = new Map<string, any>();
-            project.project_services.forEach((ps: any) => {
-                const service = ps.services;
-                if (service) {
-                    const pricingService: ServiceItem = {
-                        id: service.id,
-                        name: service.name,
-                        description: service.description || '',
-                        priceCHF: service.price,
-                        priceEUR: service.price_eur || service.price,
-                        billingType: service.billing_type,
-                        category: 'Custom'
-                    };
+    // Build list of available project services for selection
+    const availableProjectServices = useMemo(() => {
+        if (!project.project_services) return [] as ServiceItem[];
 
-                    initialItems.set(service.id, {
-                        service: pricingService,
-                        quantity: 1,
-                        customPrice: undefined
-                    });
-                }
+        const items: ServiceItem[] = [];
+        project.project_services.forEach((ps: any) => {
+            const service = ps.services;
+            if (!service) return;
+
+            const pricingService: ServiceItem & { fromProjectService?: boolean } = {
+                id: service.id,
+                name: service.name,
+                description: service.description || '',
+                priceCHF: service.price,
+                priceEUR: service.price_eur || service.price,
+                billingType: service.billing_type,
+                category: 'Custom',
+                fromProjectService: true,
+            };
+
+            items.push(pricingService);
+        });
+        return items;
+    }, [project.project_services]);
+
+    // Pre-fill services from project when opening (initial suggestion)
+    useEffect(() => {
+        if (open && availableProjectServices.length > 0 && selectedItems.size === 0) {
+            const initialItems = new Map<string, any>();
+            availableProjectServices.forEach((service) => {
+                initialItems.set(service.id, {
+                    service,
+                    quantity: 1,
+                    customPrice: undefined
+                });
             });
             setSelectedItems(initialItems);
         }
-    }, [open, project]);
+    }, [open, availableProjectServices, selectedItems.size]);
 
     const updateQuantity = (serviceId: string, delta: number) => {
         const item = selectedItems.get(serviceId);
@@ -116,6 +128,62 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
         newItems.delete(serviceId);
         setSelectedItems(newItems);
     }
+
+    const addServiceToInvoice = (service: ServiceItem & { fromProjectService?: boolean }) => {
+        const existing = selectedItems.get(service.id);
+        const newItems = new Map(selectedItems);
+
+        if (existing) {
+            newItems.set(service.id, {
+                ...existing,
+                quantity: existing.quantity + 1,
+            });
+        } else {
+            newItems.set(service.id, {
+                service,
+                quantity: 1,
+                customPrice: undefined,
+            });
+        }
+
+        setSelectedItems(newItems);
+    };
+
+    // Custom item state
+    const [customName, setCustomName] = useState("");
+    const [customDescription, setCustomDescription] = useState("");
+    const [customPrice, setCustomPrice] = useState<number>(0);
+    const [customQuantity, setCustomQuantity] = useState<number>(1);
+
+    const handleAddCustomItem = () => {
+        if (!customName || customPrice <= 0 || customQuantity <= 0) return;
+
+        const id = `custom-${Date.now()}`;
+        const customService: ServiceItem & { fromProjectService?: boolean } = {
+            id,
+            name: customName,
+            description: customDescription,
+            priceCHF: customPrice,
+            priceEUR: customPrice,
+            billingType: 'one_time',
+            category: 'Custom',
+            fromProjectService: false,
+        };
+
+        const newItems = new Map(selectedItems);
+        newItems.set(id, {
+            service: customService,
+            quantity: customQuantity,
+            customPrice: customPrice,
+        });
+        setSelectedItems(newItems);
+
+        // reset fields
+        setCustomName("");
+        setCustomDescription("");
+        setCustomPrice(0);
+        setCustomQuantity(1);
+    };
 
     const { subtotal, total, discountAmount } = useMemo(() => {
         let sum = 0;
@@ -147,24 +215,28 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
                 // Let's try to use available fields or defaults.
                 const client = project.clients || {};
 
+                // Helper to validate 2-char country code
+                const getCountryCode = (val: string | undefined | null): string => 
+                    (val && val.length === 2) ? val : 'CH';
+
                 const qrData: SwissQRBillData = {
                     currency: currency,
                     amount: total,
                     reference: qrReference || '', // If empty, assume NON. QRR needs reference.
                     creditor: {
                         name: settings.account_holder || 'Lopes2Tech',
-                        address: settings.creditor_street || 'Zurich',
+                        address: settings.creditor_street || 'Musterstrasse 1',
                         zip: settings.creditor_zip || '8000',
                         city: settings.creditor_city || 'Zurich',
-                        country: settings.creditor_country || 'CH',
+                        country: getCountryCode(settings.creditor_country),
                         account: settings.iban || settings.qr_iban || ''
                     },
                     debtor: {
-                        name: client.name || 'Client',
-                        address: client.address || 'Unknown St', // Fallback
-                        zip: client.zip || '8000',
-                        city: client.city || 'Zurich',
-                        country: client.country || 'CH'
+                        name: client.company_name || client.name || 'Client',
+                        address: client.billing_address || client.street_address || 'Musterstrasse 1',
+                        zip: client.billing_zip || client.postal_code || '8000',
+                        city: client.billing_city || client.city || 'Zurich',
+                        country: getCountryCode(client.billing_country || client.country)
                     },
                     message: `Invoice ${invoiceNumber}`
                 };
@@ -246,11 +318,29 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
                 description: `Invoice ${invoiceNumber} for ${project.name}`,
                 dueDate,
                 invoiceNumber,
-                items: Array.from(selectedItems.values()).map(i => ({
-                    service_id: i.service.id,
-                    price: i.customPrice || i.service.priceCHF, // simplify
-                    quantity: i.quantity
-                }))
+                items: Array.from(selectedItems.values()).map((i: any) => {
+                    const service = i.service as ServiceItem & { fromProjectService?: boolean };
+                    const priceConfig = getPriceForCurrency(service, currency);
+                    const basePrice = i.customPrice ?? getBasePrice(priceConfig);
+
+                    const isFromProject = service.fromProjectService;
+                    const unitLabel =
+                        service.billingType === 'monthly'
+                            ? 'month'
+                            : service.billingType === 'yearly'
+                                ? 'year'
+                                : 'unit';
+
+                    return {
+                        service_id: isFromProject ? service.id : undefined,
+                        name: service.name,
+                        description: service.description || null,
+                        quantity: i.quantity,
+                        price: basePrice,
+                        unitLabel,
+                        type: isFromProject ? 'service' : 'custom',
+                    };
+                }),
             });
 
             // 2. Upload PDF (Optimistic: assume action handles it or separate)
@@ -320,43 +410,159 @@ export function CreateInvoiceDialog({ project, iconOnly }: CreateInvoiceDialogPr
                             </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <Label>Project Services</Label>
-                            {selectedItems.size > 0 ? (
-                                <div className="border rounded-lg divide-y">
-                                    {Array.from(selectedItems.values()).map((item) => {
-                                        const price = getPriceForCurrency(item.service, currency);
-                                        const basePrice = getBasePrice(price);
-                                        return (
-                                            <div key={item.service.id} className="flex items-center justify-between p-3">
-                                                <div className="flex-1">
-                                                    <div className="font-medium">{item.service.name}</div>
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    {/* Qty */}
-                                                    <div className="flex items-center gap-2">
-                                                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updateQuantity(item.service.id, -1)}><Minus className="h-3 w-3" /></Button>
-                                                        <span className="w-6 text-center">{item.quantity}</span>
-                                                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => updateQuantity(item.service.id, 1)}><Plus className="h-3 w-3" /></Button>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Project Services</Label>
+                                {availableProjectServices.length > 0 ? (
+                                    <div className="border rounded-lg divide-y">
+                                        {availableProjectServices.map((service) => {
+                                            const priceCfg = getPriceForCurrency(service, currency);
+                                            const basePrice = getBasePrice(priceCfg);
+                                            const inInvoice = selectedItems.has(service.id);
+
+                                            return (
+                                                <div key={service.id} className="flex items-center justify-between p-3">
+                                                    <div className="flex-1">
+                                                        <div className="font-medium">{service.name}</div>
+                                                        {service.description && (
+                                                            <div className="text-xs text-muted-foreground line-clamp-1">
+                                                                {service.description}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {/* Price */}
-                                                    <Input
-                                                        type="number"
-                                                        className="w-24 text-right"
-                                                        value={item.customPrice ?? basePrice}
-                                                        onChange={e => updateCustomPrice(item.service.id, Number(e.target.value))}
-                                                    />
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => removeItem(item.service.id)}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-sm font-medium">
+                                                            {formatPrice(basePrice, currency)}
+                                                        </span>
+                                                        <Button
+                                                            size="sm"
+                                                            variant={inInvoice ? "outline" : "default"}
+                                                            onClick={() => addServiceToInvoice(service)}
+                                                        >
+                                                            {inInvoice ? "Added" : "Add"}
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )
-                                    })}
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        No services linked to this project. You can still add custom items below.
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Invoice Items (selected)</Label>
+                                {selectedItems.size > 0 ? (
+                                    <div className="border rounded-lg divide-y">
+                                        {Array.from(selectedItems.values()).map((item: any) => {
+                                            const priceCfg = getPriceForCurrency(item.service, currency);
+                                            const basePrice = getBasePrice(priceCfg);
+                                            const serviceId = item.service.id;
+                                            return (
+                                                <div key={serviceId} className="flex items-center justify-between p-3">
+                                                    <div className="flex-1">
+                                                        <div className="font-medium">{item.service.name}</div>
+                                                        {item.service.description && (
+                                                            <div className="text-xs text-muted-foreground line-clamp-1">
+                                                                {item.service.description}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        {/* Qty */}
+                                                        <div className="flex items-center gap-2">
+                                                            <Button
+                                                                size="icon"
+                                                                variant="outline"
+                                                                className="h-7 w-7"
+                                                                onClick={() => updateQuantity(serviceId, -1)}
+                                                            >
+                                                                <Minus className="h-3 w-3" />
+                                                            </Button>
+                                                            <span className="w-6 text-center">{item.quantity}</span>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="outline"
+                                                                className="h-7 w-7"
+                                                                onClick={() => updateQuantity(serviceId, 1)}
+                                                            >
+                                                                <Plus className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
+                                                        {/* Price */}
+                                                        <Input
+                                                            type="number"
+                                                            className="w-24 text-right"
+                                                            value={item.customPrice ?? basePrice}
+                                                            onChange={e => updateCustomPrice(serviceId, Number(e.target.value))}
+                                                        />
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8 text-destructive"
+                                                            onClick={() => removeItem(serviceId)}
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        No items added yet. Use the project services above or add a custom item.
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2 border-t pt-4">
+                                <Label className="text-sm font-medium">Add Custom Item</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                    <div className="md:col-span-2 space-y-1">
+                                        <Input
+                                            placeholder="Item name"
+                                            value={customName}
+                                            onChange={(e) => setCustomName(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Input
+                                            placeholder="Price"
+                                            type="number"
+                                            value={customPrice || ""}
+                                            onChange={(e) => setCustomPrice(Number(e.target.value))}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Input
+                                            placeholder="Qty"
+                                            type="number"
+                                            value={customQuantity}
+                                            onChange={(e) => setCustomQuantity(Number(e.target.value))}
+                                        />
+                                    </div>
                                 </div>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">No services selected.</p>
-                            )}
+                                <Input
+                                    placeholder="Optional description"
+                                    value={customDescription}
+                                    onChange={(e) => setCustomDescription(e.target.value)}
+                                    className="mt-2"
+                                />
+                                <div className="flex justify-end">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleAddCustomItem}
+                                        disabled={!customName || customPrice <= 0 || customQuantity <= 0}
+                                    >
+                                        Add Custom Item
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex flex-col items-end gap-2 pt-4 border-t">
