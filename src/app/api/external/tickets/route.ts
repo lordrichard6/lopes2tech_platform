@@ -12,6 +12,7 @@ const ticketSchema = z.object({
     phone: z.string().optional(),
     message: z.string().min(1),
     context: z.string().optional().default('General'),
+    source: z.string().optional(),
 });
 
 // Admin client to bypass RLS
@@ -23,12 +24,12 @@ const supabaseAdmin = createClient(
 export async function POST(req: NextRequest) {
     try {
         // 1. Verify API Key
-        const apiKey = request.headers.get('x-api-key');
+        const apiKey = req.headers.get('x-api-key');
         if (apiKey !== process.env.PLATFORM_API_SECRET) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body = await request.json();
+        const body = await req.json();
         const validatedData = ticketSchema.parse(body);
 
         const supabase = createClient(
