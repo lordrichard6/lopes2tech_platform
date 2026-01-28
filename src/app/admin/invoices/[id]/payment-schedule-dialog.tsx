@@ -181,7 +181,8 @@ export function PaymentScheduleDialog({ invoice, existingSchedules }: PaymentSch
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-4">
+                {/* Scrollable content so large schedules stay within viewport */}
+                <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-1">
                     {/* Quick Actions */}
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={distributeEvenly}>

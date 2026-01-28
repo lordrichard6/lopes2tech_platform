@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 import { AddLinkDialog } from "./add-link-dialog";
 import { ProjectLinksList } from "./project-links-list";
+import { cn } from "@/lib/utils";
 
 interface ProjectService {
     service_id: string;
@@ -101,7 +102,13 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
                                         <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
                                             {project.name}
                                         </CardTitle>
-                                        <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="capitalize px-3 py-1">
+                                        <Badge 
+                                            variant={project.status === 'active' ? 'default' : project.status === 'completed' ? 'default' : 'secondary'} 
+                                            className={cn(
+                                                "capitalize px-3 py-1",
+                                                project.status === 'completed' && 'bg-green-500 hover:bg-green-600 text-white border-green-600'
+                                            )}
+                                        >
                                             {project.status}
                                         </Badge>
                                     </div>

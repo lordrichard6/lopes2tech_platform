@@ -20,9 +20,11 @@ import { toast } from "sonner"
 
 interface DeletePaymentButtonProps {
     paymentId: string
+    asChild?: boolean
+    children?: React.ReactNode
 }
 
-export function DeletePaymentButton({ paymentId }: DeletePaymentButtonProps) {
+export function DeletePaymentButton({ paymentId, asChild, children }: DeletePaymentButtonProps) {
     const [isDeleting, setIsDeleting] = useState(false)
     const router = useRouter()
 
@@ -41,14 +43,18 @@ export function DeletePaymentButton({ paymentId }: DeletePaymentButtonProps) {
 
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" disabled={isDeleting}>
-                    {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                    )}
-                </Button>
+            <AlertDialogTrigger asChild={!!children || asChild}>
+                {children ? (
+                    children
+                ) : (
+                    <Button variant="ghost" size="icon" disabled={isDeleting}>
+                        {isDeleting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                        )}
+                    </Button>
+                )}
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

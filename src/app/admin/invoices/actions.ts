@@ -346,6 +346,67 @@ export async function deletePaymentAction(paymentId: string) {
     return { success: true }
 }
 
+export async function updatePaymentAction(formData: FormData) {
+    const supabase = await createClient()
+
+    const paymentId = formData.get('payment_id') as string
+    const invoiceId = formData.get('invoice_id') as string
+    const amount = parseFloat(formData.get('amount') as string)
+    const paymentDate = formData.get('payment_date') as string
+    const paymentMethod = formData.get('payment_method') as string
+    const reference = formData.get('reference') as string
+    const notes = formData.get('notes') as string
+
+    if (!paymentId || !invoiceId || !Number.isFinite(amount)) {
+        return { error: 'Payment ID, Invoice ID, and Amount are required' }
+    }
+
+    const { error } = await supabase
+        .from('invoice_payments')
+        .update({
+            amount,
+            payment_date: paymentDate || null,
+            payment_method: paymentMethod || null,
+            reference: reference || null,
+            notes: notes || null,
+        })
+        .eq('id', paymentId)
+        .eq('invoice_id', invoiceId)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    // Re-sync invoice amount_paid + status based on payments (same logic as recordPaymentAction)
+    const { data: payments } = await supabase
+        .from('invoice_payments')
+        .select('amount')
+        .eq('invoice_id', invoiceId)
+
+    const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+    const { data: invoice } = await supabase
+        .from('invoices')
+        .select('amount')
+        .eq('id', invoiceId)
+        .single()
+
+    let newStatus = 'partial'
+    if (totalPaid <= 0) newStatus = 'pending'
+    if (totalPaid >= (invoice?.amount || 0)) newStatus = 'paid'
+
+    await supabase
+        .from('invoices')
+        .update({
+            amount_paid: totalPaid,
+            status: newStatus
+        })
+        .eq('id', invoiceId)
+
+    revalidatePath('/admin/invoices')
+    return { success: true }
+}
+
 export async function deleteInvoiceAction(invoiceId: string) {
     const supabase = await createClient()
 

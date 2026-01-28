@@ -150,9 +150,15 @@ async function updateProjectProgress(projectId: string) {
     const completed = milestones.filter(m => m.status === 'completed').length
     const progress = Math.round((completed / milestones.length) * 100)
 
+    // If all milestones are completed (progress = 100%), automatically mark project as completed
+    const updates: { progress: number; status?: string } = { progress }
+    if (progress === 100) {
+        updates.status = 'completed'
+    }
+
     await supabase
         .from('projects')
-        .update({ progress })
+        .update(updates)
         .eq('id', projectId)
 }
 
@@ -194,7 +200,10 @@ export async function createProjectInvoiceAction(data: {
 }) {
     const supabase = await createClient()
 
-    const { error } = await supabase
+    // 1) Create invoice with basic + metadata (net/gross = total for now, no tax)
+    const issueDate = new Date().toISOString().split('T')[0];
+
+    const { data: inserted, error } = await supabase
         .from('invoices')
         .insert({
             client_id: data.clientId,
@@ -204,9 +213,66 @@ export async function createProjectInvoiceAction(data: {
             description: data.description,
             status: 'pending',
             due_date: data.dueDate,
+            invoice_number: data.invoiceNumber,
+            issue_date: issueDate,
+            net_amount: data.amount,
+            tax_amount: 0,
+            gross_amount: data.amount
         })
+        .select('id')
+        .single()
 
-    if (error) throw new Error(error.message)
+    if (error || !inserted) {
+        throw new Error(error?.message || 'Failed to create invoice');
+    }
+
+    const invoiceId = inserted.id as string;
+
+    // 2) Persist invoice line items (matches current project invoice UI)
+    const items = (data.items || []) as Array<{
+        service_id?: string;
+        name?: string;
+        description?: string;
+        quantity: number;
+        price: number;
+        unitLabel?: string;
+        type?: string;
+    }>;
+
+    if (items.length > 0) {
+        const invoiceItems = items.map((item, index) => {
+            const quantity = Number(item.quantity) || 0;
+            const unitPrice = Number(item.price) || 0;
+            const subtotal = quantity * unitPrice;
+
+            return {
+                invoice_id: invoiceId,
+                position: index + 1,
+                type: item.type || (item.service_id ? 'service' : 'item'),
+                name: item.name || 'Item',
+                description: item.description || null,
+                service_id: item.service_id || null,
+                quantity,
+                unit_label: item.unitLabel || null,
+                unit_price: unitPrice,
+                discount_percent: null,
+                tax_rate_percent: null,
+                line_subtotal: subtotal,
+                line_discount_amount: null,
+                line_tax_amount: 0,
+                line_total: subtotal
+            };
+        });
+
+        const { error: itemsError } = await supabase
+            .from('invoice_items')
+            .insert(invoiceItems);
+
+        if (itemsError) {
+            console.error('Failed to create invoice items:', itemsError);
+            // Do not throw to avoid breaking invoice creation; items can be backfilled later.
+        }
+    }
 
     revalidatePath(`/admin/projects/${data.projectId}`)
 }

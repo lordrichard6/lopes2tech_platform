@@ -129,6 +129,14 @@ export async function POST(req: Request) {
                         const currency = session.currency?.toUpperCase() || 'CHF';
                         const paymentIntentId = session.payment_intent as string;
 
+                        // Calculate due_date: one month from subscription start_date
+                        let dueDate = new Date();
+                        if (sub.start_date) {
+                            const startDate = new Date(sub.start_date);
+                            dueDate = new Date(startDate);
+                            dueDate.setMonth(startDate.getMonth() + 1);
+                        }
+
                         // Create invoice
                         const { data: newInvoice, error: invError } = await supabase
                             .from('invoices')
@@ -140,7 +148,7 @@ export async function POST(req: Request) {
                                 amount_paid: amountPaid,
                                 description: `Subscription Renewal: ${sub.services?.name || 'Subscription'}`,
                                 stripe_payment_intent_id: paymentIntentId || null,
-                                due_date: new Date().toISOString().split('T')[0]
+                                due_date: dueDate.toISOString().split('T')[0]
                             })
                             .select('id')
                             .single();
@@ -193,6 +201,16 @@ export async function POST(req: Request) {
                     const amountPaid = invoice.amount_paid / 100; // Stripe uses cents
                     const paymentIntentId = invoice.payment_intent as string;
 
+                    // Calculate due_date: one month from subscription start_date
+                    let dueDate = new Date();
+                    if (sub.start_date) {
+                        const startDate = new Date(sub.start_date);
+                        dueDate = new Date(startDate);
+                        // For recurring payments, calculate based on current period
+                        // But for simplicity, use one month from start_date
+                        dueDate.setMonth(startDate.getMonth() + 1);
+                    }
+
                     // 1. Create a "Paid Invoice" record in our system for tracking
                     // This fulfills the "Track payments" requirement
                     const { data: newInvoice, error: invError } = await supabase
@@ -205,8 +223,7 @@ export async function POST(req: Request) {
                             amount_paid: amountPaid,
                             description: `Subscription Renewal: ${sub.services?.name}`,
                             stripe_payment_intent_id: paymentIntentId,
-                            // Set due_date to today since it's paid
-                            due_date: new Date().toISOString().split('T')[0]
+                            due_date: dueDate.toISOString().split('T')[0]
                         })
                         .select('id')
                         .single();

@@ -250,7 +250,7 @@ export default function AdminProjectsPage() {
     function getStatusColor(status: string) {
         switch (status) {
             case 'active': return 'default';
-            case 'completed': return 'outline';
+            case 'completed': return 'default'; // Will use green variant
             case 'on_hold': return 'secondary';
             case 'cancelled': return 'destructive';
             default: return 'secondary';
@@ -454,7 +454,10 @@ export default function AdminProjectsPage() {
                                                 </TableCell>
                                                 <TableCell>{project.clients?.name || 'Unknown'}</TableCell>
                                                 <TableCell>
-                                                    <Badge variant={getStatusColor(project.status)}>
+                                                    <Badge 
+                                                        variant={getStatusColor(project.status)}
+                                                        className={project.status === 'completed' ? 'bg-green-500 hover:bg-green-600 text-white border-green-600' : ''}
+                                                    >
                                                         {project.status.replace('_', ' ')}
                                                     </Badge>
                                                 </TableCell>

@@ -7,11 +7,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ArrowLeft, CreditCard, FileText, Building2, AlertTriangle, ExternalLink } from "lucide-react";
+import { ArrowLeft, CreditCard, FileText, Building2, AlertTriangle, ExternalLink, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { DeletePaymentButton } from "./delete-payment-button";
 import { InvoiceActions } from "./invoice-actions";
 import { PaymentScheduleDialog } from "./payment-schedule-dialog";
 import { PaymentScheduleTable } from "./payment-schedule-table";
+import { EditPaymentDialog } from "./edit-payment-dialog";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -246,7 +254,35 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                                                     {payment.notes || '-'}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <DeletePaymentButton paymentId={payment.id} />
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem asChild>
+                                                            <EditPaymentDialog
+                                                                invoiceId={invoice.id}
+                                                                payment={payment}
+                                                                trigger={
+                                                                    <button className="flex w-full items-center gap-2 text-sm">
+                                                                        <Pencil className="h-4 w-4" />
+                                                                        <span>Edit payment</span>
+                                                                    </button>
+                                                                }
+                                                            />
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem asChild>
+                                                            <DeletePaymentButton paymentId={payment.id} asChild>
+                                                                <button className="flex w-full items-center gap-2 text-sm text-red-600">
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                    <span>Delete</span>
+                                                                </button>
+                                                            </DeletePaymentButton>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
