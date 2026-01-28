@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
+import { logActivity } from '@/lib/activity';
 
 // Schema for validation
 const ticketSchema = z.object({
@@ -61,6 +62,21 @@ export async function POST(req: NextRequest) {
             console.error('Supabase Insert Error:', error);
             return NextResponse.json({ error: 'Database error' }, { status: 500 });
         }
+
+        return NextResponse.json({ success: true, id: data.id });
+
+        // 4. Log Activity
+        await logActivity({
+            action: 'document_uploaded', // Best fit for now, or we add a new type 'create_ticket'
+            entityType: 'system',
+            entityId: data.id,
+            metadata: {
+                ticket_id: data.id,
+                name: name,
+                email: email,
+                context: context
+            }
+        });
 
         return NextResponse.json({ success: true, id: data.id });
 
