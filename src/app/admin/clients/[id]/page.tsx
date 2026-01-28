@@ -83,6 +83,32 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         .eq("client_id", id)
         .order("start_date", { ascending: false });
 
+    // Fetch Stripe subscription statuses for subscriptions linked to Stripe
+    const stripeSubscriptionIds = subscriptions
+        ?.filter(sub => sub.stripe_subscription_id)
+        .map(sub => sub.stripe_subscription_id) || [];
+
+    const { getStripeSubscriptionStatuses } = await import('./stripe-subscription-status');
+    const stripeStatuses = stripeSubscriptionIds.length > 0
+        ? await getStripeSubscriptionStatuses(stripeSubscriptionIds)
+        : {};
+
+    // Fetch subscription payment invoices
+    // Get ALL paid invoices for this client (we'll filter by description in the component)
+    const { data: allClientInvoices } = await supabase
+        .from("invoices")
+        .select("id, amount, currency, created_at, stripe_payment_intent_id, description, status")
+        .eq("client_id", id)
+        .order("created_at", { ascending: false });
+
+    // Filter for subscription-related invoices
+    const subscriptionInvoices = allClientInvoices?.filter(inv => 
+        inv.status === 'paid' && (
+            inv.description?.includes('Subscription Renewal:') || 
+            inv.stripe_payment_intent_id !== null
+        )
+    ) || [];
+
     // Fetch Available Services (for dropdown)
     const { data: availableServices } = await supabase
         .from("services")
@@ -182,6 +208,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                                 clientEmail={client.contact_email}
                                 subscriptions={subscriptions || []}
                                 availableServices={availableServices || []}
+                                stripeStatuses={stripeStatuses}
+                                subscriptionInvoices={subscriptionInvoices || []}
                             />
 
                             {/* Projects Section */}

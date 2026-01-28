@@ -215,6 +215,30 @@ export type Dictionary = {
         needHelp: string;
         footer: string;
     };
+    subscriptions: {
+        title: string;
+        subtitle: string;
+        noSubscriptions: string;
+        noSubscriptionsDesc: string;
+        stripeLinked: string;
+        paid: string;
+        pastDue: string;
+        unpaid: string;
+        started: string;
+        ended: string;
+        nextPayment: string;
+        lastPaid: string;
+        amountDue: string;
+        payNow: string;
+        processing: string;
+        viewInStripe: string;
+        noDescription: string;
+        unknown: string;
+        paymentLog: string;
+        payment: string;
+        recorded: string;
+        noPaymentsYet: string;
+    };
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -308,6 +332,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
             contactSupport: "Contact Support",
             needHelp: "Need help?",
             footer: "Lopes2Tech. All rights reserved.",
+        },
+        subscriptions: {
+            title: "My Subscriptions",
+            subtitle: "View your active recurring services and payment status",
+            noSubscriptions: "No subscriptions found",
+            noSubscriptionsDesc: "You don't have any active subscriptions yet.",
+            stripeLinked: "Stripe Linked",
+            paid: "Paid",
+            pastDue: "Past Due",
+            unpaid: "Unpaid",
+            started: "Started",
+            ended: "Ended",
+            nextPayment: "Next payment",
+            lastPaid: "Last paid",
+            amountDue: "Amount due",
+            payNow: "Pay Now",
+            processing: "Processing...",
+            viewInStripe: "View in Stripe",
+            noDescription: "No description",
+            unknown: "Unknown",
+            paymentLog: "Payment Log",
+            payment: "payment",
+            recorded: "recorded",
+            noPaymentsYet: "No payments recorded yet. Payments will appear here after payment is processed.",
         },
         dashboard: {
             welcome: "Welcome back",
@@ -416,6 +464,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
             requests: "Requests",
             documents: "Documents",
             invoices: "Invoices",
+            subscriptions: "Subscriptions",
         },
         documents: {
             title: "Documents",
@@ -525,6 +574,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
             needHelp: "Precisa de ajuda?",
             footer: "Lopes2Tech. Todos os direitos reservados.",
         },
+        subscriptions: {
+            title: "Minhas Assinaturas",
+            subtitle: "Visualize seus serviços recorrentes ativos e status de pagamento",
+            noSubscriptions: "Nenhuma assinatura encontrada",
+            noSubscriptionsDesc: "Você ainda não tem assinaturas ativas.",
+            stripeLinked: "Vinculado ao Stripe",
+            paid: "Pago",
+            pastDue: "Atrasado",
+            unpaid: "Não Pago",
+            started: "Iniciado",
+            ended: "Encerrado",
+            nextPayment: "Próximo pagamento",
+            lastPaid: "Último pagamento",
+            amountDue: "Valor devido",
+            payNow: "Pagar Agora",
+            processing: "Processando...",
+            viewInStripe: "Ver no Stripe",
+            noDescription: "Sem descrição",
+            unknown: "Desconhecido",
+            paymentLog: "Registro de Pagamentos",
+            payment: "pagamento",
+            recorded: "registrado",
+            noPaymentsYet: "Nenhum pagamento registrado ainda. Os pagamentos aparecerão aqui após o processamento.",
+        },
         dashboard: {
             welcome: "Bem-vindo de volta",
             activeProjects: "Projetos Ativos",
@@ -632,6 +705,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
             requests: "Solicitações",
             documents: "Documentos",
             invoices: "Faturas",
+            subscriptions: "Assinaturas",
         },
         documents: {
             title: "Documentos",
@@ -741,6 +815,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
             needHelp: "Brauchen Sie Hilfe?",
             footer: "Lopes2Tech. Alle Rechte vorbehalten.",
         },
+        subscriptions: {
+            title: "Meine Abonnements",
+            subtitle: "Zeigen Sie Ihre aktiven wiederkehrenden Dienste und Zahlungsstatus an",
+            noSubscriptions: "Keine Abonnements gefunden",
+            noSubscriptionsDesc: "Sie haben noch keine aktiven Abonnements.",
+            stripeLinked: "Mit Stripe verknüpft",
+            paid: "Bezahlt",
+            pastDue: "Überfällig",
+            unpaid: "Nicht bezahlt",
+            started: "Gestartet",
+            ended: "Beendet",
+            nextPayment: "Nächste Zahlung",
+            lastPaid: "Letzte Zahlung",
+            amountDue: "Fälliger Betrag",
+            payNow: "Jetzt bezahlen",
+            processing: "Wird verarbeitet...",
+            viewInStripe: "In Stripe anzeigen",
+            noDescription: "Keine Beschreibung",
+            unknown: "Unbekannt",
+            paymentLog: "Zahlungsprotokoll",
+            payment: "Zahlung",
+            recorded: "erfasst",
+            noPaymentsYet: "Noch keine Zahlungen erfasst. Zahlungen werden hier nach der Verarbeitung angezeigt.",
+        },
         dashboard: {
             welcome: "Willkommen zurück",
             activeProjects: "Aktive Projekte",
@@ -848,6 +946,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
             requests: "Anfragen",
             documents: "Dokumente",
             invoices: "Rechnungen",
+            subscriptions: "Abonnements",
         },
         documents: {
             title: "Dokumente",

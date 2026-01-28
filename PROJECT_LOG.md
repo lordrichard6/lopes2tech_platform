@@ -167,3 +167,40 @@ Working - Clients can generate QR bills/PDFs instantly and mark payments as paid
 2. Add email notification to Client when Admin confirms payment.
 
 ---
+
+## 2026-01-28 13:40 - Ticket Module Implementation & Login Refactor
+
+### Summary
+Implemented a full-featured Ticket Module to capture contact form inquiries from the website directly into the platform. This involved database changes, a new public API endpoint, and a comprehensive Admin UI with lead management and email reply capabilities. Also refactored the Login Flow to improve user experience.
+
+### Decisions Made
+- **Public API for Tickets**: Created a secured public API endpoint (`/api/external/tickets`) to allow the external website to submit forms directly to the platform database.
+- **Service Role for Logs**: Used Service Role key for Activity Logging to ensuring consistent audit trails regardless of user permissions.
+- **No Redirect on Login Error**: Switched from URL-based error handling (redirects) to React Server Actions + `useFormState` to display login errors inline without page reloads.
+
+### Key Changes
+- **Database**:
+    - Created `tickets` table (`20260128120000_create_tickets_table.sql`).
+    - Added `source` column to track origin (`20260128130000_add_ticket_source.sql`).
+- **Admin UI**:
+    - New Ticket Dialog for viewing details, saving as lead (creates Client), and sending email replies (Resend).
+    - Added Delete Ticket functionality.
+- **Integration**:
+    - Updated Website's `email.service.ts` to sync with Platform API.
+- **Login**:
+    - Refactored `actions.ts` to return error objects.
+    - Updated `login-form.tsx` to handle state-based errors.
+
+### Current State
+Working - Ticket module is deployed to production and fully functional. Login refactor is deployed. Local admin verification was skipped due to stopped local database.
+
+### Next Steps
+1. Start local Supabase instance (`npx supabase start`).
+2. Verify local admin account permissions (script `scripts/check_admin.ts` is ready).
+3. Continue monitoring ticket API for spam/abuse (consider adding rate limiting later).
+
+### Notes
+- The website now sends data to BOTH EmailJS (email) and Platform API (database).
+- Deployment to Vercel requires the `PLATFORM_API_SECRET` environment variable which is set.
+
+---

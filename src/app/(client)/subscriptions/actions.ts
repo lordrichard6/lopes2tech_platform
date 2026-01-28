@@ -1,33 +1,58 @@
 'use server'
 
-import { requireAdmin } from "@/lib/auth";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
-import { createAdminClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export async function createSubscriptionCheckoutSession(
-    subscriptionId: string,
-    stripePriceId: string,
-    clientEmail?: string,
-    clientName?: string
+export async function createClientSubscriptionCheckout(
+    subscriptionId: string
 ) {
-    if (!stripePriceId) throw new Error("Service has no Stripe Price ID");
-    if (!stripe) throw new Error("Stripe is not configured. Please set STRIPE_SECRET_KEY in your .env");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Get subscription to find start_date
-    const supabase = createAdminClient();
-    const { data: subscription } = await supabase
-        .from('subscriptions')
-        .select('start_date, services(billing_type)')
-        .eq('id', subscriptionId)
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    // Find client linked to this user
+    const adminDb = createAdminClient();
+    const { data: client } = await adminDb
+        .from('clients')
+        .select('id, name, contact_email')
+        .or(`profile_id.eq.${user.id},contact_email.ilike.${user.email}`)
         .single();
+
+    if (!client) {
+        throw new Error("Client profile not found");
+    }
+
+    // Fetch subscription and verify it belongs to this client
+    const { data: subscription } = await adminDb
+        .from('subscriptions')
+        .select('*, services(*)')
+        .eq('id', subscriptionId)
+        .eq('client_id', client.id)
+        .single();
+
+    if (!subscription) {
+        throw new Error("Subscription not found");
+    }
+
+    if (!subscription.services?.stripe_price_id) {
+        throw new Error("This service is not linked to Stripe. Please contact support.");
+    }
+
+    if (!stripe) {
+        throw new Error("Stripe is not configured");
+    }
 
     const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
     try {
         // Calculate billing cycle anchor based on subscription start_date
         let billingCycleAnchor: number | undefined;
-        if (subscription?.start_date) {
+        if (subscription.start_date) {
             const startDate = new Date(subscription.start_date);
             const now = new Date();
             const billingType = subscription.services?.billing_type || 'monthly';
@@ -56,16 +81,17 @@ export async function createSubscriptionCheckoutSession(
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: stripePriceId,
+                    price: subscription.services.stripe_price_id,
                     quantity: 1,
                 },
             ],
-            customer_email: clientEmail, // Pre-fill email
-            success_url: `${origin}/accept/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${origin}/accept/cancel`,
+            customer_email: client.contact_email || user.email || undefined,
+            success_url: `${origin}/subscriptions?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}/subscriptions?canceled=true`,
             metadata: {
-                subscription_id: subscriptionId, // Link back to our DB
-                client_name: clientName || '',
+                subscription_id: subscriptionId,
+                client_id: client.id,
+                client_name: client.name || '',
             },
         };
 
@@ -82,6 +108,6 @@ export async function createSubscriptionCheckoutSession(
         return { url: session.url };
     } catch (error: any) {
         console.error("Stripe Error:", error);
-        throw new Error(error.message);
+        throw new Error(error.message || "Failed to create checkout session");
     }
 }

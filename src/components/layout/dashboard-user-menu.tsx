@@ -35,12 +35,12 @@ export function DashboardUserMenu({ email, avatarUrl, clientName }: DashboardUse
     return (
         <DropdownMenu>
             <DropdownMenuTrigger className="outline-none">
-                <div className="flex items-center gap-3 pl-4 cursor-pointer hover:opacity-80 transition-opacity">
-                    <Avatar className="h-8 w-8">
+                <div className="flex items-center gap-3 pl-4 cursor-pointer hover:opacity-80 transition-opacity h-full">
+                    <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarImage src={avatarUrl || ''} alt={clientName} />
                         <AvatarFallback>{clientName.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm font-medium hidden md:inline-block">{clientName}</span>
+                    <span className="text-sm font-medium hidden md:inline-block whitespace-nowrap">{clientName}</span>
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

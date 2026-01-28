@@ -69,6 +69,45 @@ export async function enablePortalAccessAction(formData: FormData) {
     }
 }
 
+const resetPasswordSchema = z.object({
+    profileId: z.string().uuid(),
+    password: z.string().min(6)
+})
+
+export async function resetClientPasswordAction(formData: FormData) {
+    try {
+        await requireAdmin()
+
+        const rawData = {
+            profileId: formData.get('profileId'),
+            password: formData.get('password')
+        }
+
+        const parseResult = resetPasswordSchema.safeParse(rawData)
+        if (!parseResult.success) {
+            return { error: parseResult.error.issues[0].message }
+        }
+
+        const { profileId, password } = parseResult.data
+
+        const adminSupabase = createAdminClient()
+
+        // Update user password using admin API
+        const { error: updateError } = await adminSupabase.auth.admin.updateUserById(profileId, {
+            password: password
+        })
+
+        if (updateError) {
+            return { error: `Failed to update password: ${updateError.message}` }
+        }
+
+        revalidatePath(`/admin/clients/${formData.get('clientId')}`)
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "An unexpected error occurred" }
+    }
+}
+
 const sendEmailSchema = z.object({
     clientId: z.string().uuid(),
     language: z.enum(['en', 'de', 'pt']).default('en')

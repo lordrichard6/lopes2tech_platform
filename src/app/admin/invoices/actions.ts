@@ -8,12 +8,12 @@ export async function confirmPaymentAction(scheduleId: string, invoiceId: string
     const supabase = await createClient()
 
     // 1. Get schedule and client details for email BEFORE update (to ensure we have data)
-    const { data: schedule } = await supabase
+    const { data: schedule, error: scheduleError } = await supabase
         .from('invoice_payment_schedules')
         .select(`
             *,
             invoice:invoices (
-                invoice_number,
+                id,
                 currency,
                 clients (
                     contact_email
@@ -23,7 +23,14 @@ export async function confirmPaymentAction(scheduleId: string, invoiceId: string
         .eq('id', scheduleId)
         .single()
 
-    if (!schedule) return { error: 'Schedule not found' }
+    if (scheduleError) {
+        console.error('Schedule lookup error:', scheduleError);
+        return { error: `Schedule not found: ${scheduleError.message}` }
+    }
+
+    if (!schedule) {
+        return { error: 'Schedule not found' }
+    }
 
     // 2. Update schedule status
     const { error: updateError } = await supabase
@@ -69,7 +76,7 @@ export async function confirmPaymentAction(scheduleId: string, invoiceId: string
     const clientEmail = schedule.invoice?.clients?.contact_email
     if (clientEmail) {
         await sendPaymentConfirmedEmail(clientEmail, {
-            invoiceNumber: schedule.invoice.invoice_number || 'N/A',
+            invoiceNumber: schedule.invoice.id.slice(0, 8).toUpperCase() || 'N/A',
             installmentNumber: schedule.installment_number,
             amount: schedule.amount.toFixed(2),
             currency: schedule.invoice.currency
@@ -130,7 +137,7 @@ export async function createInvoiceAction(formData: FormData) {
         return { error: 'Client and Amount are required' }
     }
 
-    const { data: invoice } = await supabase
+    const { data: invoice, error } = await supabase
         .from('invoices')
         .insert({
             client_id: clientId,

@@ -11,7 +11,13 @@ function isRedirectError(error: any) {
     return error?.message === 'NEXT_REDIRECT' || error?.digest === 'NEXT_REDIRECT';
 }
 
-export async function login(formData: FormData) {
+// Define return type
+type LoginState = {
+    error?: string;
+    message?: string;
+} | undefined;
+
+export async function login(prevState: LoginState, formData: FormData) {
     const supabase = await createClient()
 
     const email = formData.get('email') as string
@@ -24,11 +30,17 @@ export async function login(formData: FormData) {
         })
 
         if (error) {
-            redirect('/login?error=Invalid login credentials')
+            console.error('Login action error:', error);
+            return { error: 'Invalid login credentials' }
         }
+
+        console.log('Login successful for:', email);
 
         // Check user role to redirect appropriately
         const { data: { user } } = await supabase.auth.getUser()
+
+        console.log('User metadata:', user?.user_metadata);
+        console.log('Admin Email Env:', process.env.ADMIN_EMAIL);
 
         // Use server-only ADMIN_EMAIL (not exposed to client)
         const isAdmin = user?.user_metadata?.role === 'admin' || email === process.env.ADMIN_EMAIL
@@ -57,7 +69,7 @@ export async function login(formData: FormData) {
     } catch (error) {
         if (isRedirectError(error)) throw error
         console.error('Login error:', error)
-        redirect('/login?error=An unexpected error occurred. Please try again.')
+        return { error: 'An unexpected error occurred. Please try again.' }
     }
 }
 

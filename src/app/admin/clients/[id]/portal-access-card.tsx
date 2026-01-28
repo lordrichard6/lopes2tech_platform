@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle2, Lock, UserPlus, Mail, Loader2 } from 'lucide-react';
-import { enablePortalAccessAction, sendWelcomeEmailAction } from './actions';
+import { CheckCircle2, Lock, UserPlus, Mail, Loader2, KeyRound } from 'lucide-react';
+import { enablePortalAccessAction, sendWelcomeEmailAction, resetClientPasswordAction } from './actions';
 import { toast } from 'sonner';
 
 interface PortalAccessCardProps {
@@ -33,6 +33,7 @@ function SubmitButton({ children, text }: { children: React.ReactNode, text: str
 export function PortalAccessCard({ clientId, clientName, clientEmail, profileId }: PortalAccessCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isEmailOpen, setIsEmailOpen] = useState(false);
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
 
     if (profileId) {
         return (
@@ -45,6 +46,73 @@ export function PortalAccessCard({ clientId, clientName, clientEmail, profileId 
                         </CardTitle>
                         <div className="flex items-center gap-2">
                             <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
+
+                            <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-blue-700 hover:text-blue-800 hover:bg-blue-100 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/20"
+                                                >
+                                                    <KeyRound className="h-4 w-4" />
+                                                    <span className="sr-only">Reset Password</span>
+                                                </Button>
+                                            </DialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Reset Password</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Reset Password</DialogTitle>
+                                        <DialogDescription>
+                                            Set a new password for <strong>{clientName}</strong> ({clientEmail}).
+                                            They will need to use this password to log in.
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <form action={async (formData) => {
+                                        const result = await resetClientPasswordAction(formData);
+                                        if (result?.error) {
+                                            toast.error(result.error);
+                                        } else {
+                                            toast.success("Password reset successfully!");
+                                            setIsPasswordOpen(false);
+                                        }
+                                    }}>
+                                        <input type="hidden" name="clientId" value={clientId} />
+                                        <input type="hidden" name="profileId" value={profileId || ''} />
+
+                                        <div className="grid gap-4 py-4">
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="password">New Password</Label>
+                                                <Input
+                                                    id="password"
+                                                    name="password"
+                                                    type="text"
+                                                    placeholder="Enter new password"
+                                                    required
+                                                    minLength={6}
+                                                    autoComplete="off"
+                                                />
+                                                <p className="text-xs text-muted-foreground">
+                                                    Minimum 6 characters. The client will need this password to log in.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <DialogFooter>
+                                            <SubmitButton text="Resetting...">Reset Password</SubmitButton>
+                                        </DialogFooter>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
 
                             <Dialog open={isEmailOpen} onOpenChange={setIsEmailOpen}>
                                 <TooltipProvider>

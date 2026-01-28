@@ -22,11 +22,31 @@ export async function createSubscription(data: {
 export async function cancelSubscription(id: string, clientId?: string) {
     const { supabase } = await requireAdmin();
 
+    // Also cancel in Stripe if linked
+    const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('stripe_subscription_id')
+        .eq('id', id)
+        .single();
+
+    if (subscription?.stripe_subscription_id) {
+        try {
+            const { stripe } = await import('@/lib/stripe');
+            if (stripe) {
+                await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+                    cancel_at_period_end: true
+                });
+            }
+        } catch (error) {
+            console.error('Error cancelling Stripe subscription:', error);
+            // Continue with local cancellation even if Stripe fails
+        }
+    }
+
     const { error } = await supabase
         .from('subscriptions')
         .update({
-            status: 'cancelled',
-            updated_at: new Date().toISOString()
+            status: 'cancelled'
         })
         .eq('id', id);
 

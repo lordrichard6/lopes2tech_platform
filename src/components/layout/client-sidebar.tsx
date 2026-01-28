@@ -1,7 +1,7 @@
 'use client';
 
 import { Sidebar } from './sidebar';
-import { Folder, Inbox, FileText, Files, LayoutDashboard } from 'lucide-react';
+import { Folder, Inbox, FileText, Files, LayoutDashboard, CreditCard } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 
 export function ClientSidebar() {
@@ -12,6 +12,7 @@ export function ClientSidebar() {
         { title: t.sidebar.requests, href: '/requests', icon: Inbox },
         { title: t.sidebar.documents, href: '/documents', icon: Files },
         { title: t.sidebar.invoices, href: '/invoices', icon: FileText },
+        { title: t.sidebar.subscriptions, href: '/subscriptions', icon: CreditCard },
     ];
 
     return <Sidebar links={links} />;
