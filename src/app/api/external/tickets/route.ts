@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         // 4. Log Activity
         await logActivity({
-            action: 'document_uploaded', // Best fit for now, or we add a new type 'create_ticket'
+            action: 'create_ticket',
             entityType: 'system',
             entityId: data.id,
             metadata: {

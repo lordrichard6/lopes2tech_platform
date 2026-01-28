@@ -23,7 +23,9 @@ export type ActivityAction =
     | 'payment_received'
     | 'install_payment_verified'
     | 'document_uploaded'
-    | 'document_signed';
+    | 'document_uploaded'
+    | 'document_signed'
+    | 'create_ticket';
 
 export type EntityType =
     | 'system'
