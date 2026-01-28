@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { format } from 'date-fns';
 import {
     Sheet,
@@ -44,7 +44,7 @@ interface TicketSheetProps {
 }
 
 export function TicketSheet({ ticket, open, onOpenChange, onUpdate }: TicketSheetProps) {
-    const supabase = createClientComponentClient();
+    const supabase = createClient();
     const [updating, setUpdating] = useState(false);
 
     if (!ticket) return null;
