@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Mail, Phone, ExternalLink } from 'lucide-react';
-import { TicketSheet } from './ticket-sheet';
+import { TicketDialog } from './ticket-dialog';
 
 interface Ticket {
     id: string;
@@ -149,7 +149,13 @@ export default function TicketsPage() {
                 </CardContent>
             </Card>
 
-            <TicketSheet
+            {/* <TicketSheet
+                ticket={selectedTicket}
+                open={!!selectedTicket}
+                onOpenChange={(open) => !open && setSelectedTicket(null)}
+                onUpdate={fetchTickets}
+            /> */}
+            <TicketDialog
                 ticket={selectedTicket}
                 open={!!selectedTicket}
                 onOpenChange={(open) => !open && setSelectedTicket(null)}

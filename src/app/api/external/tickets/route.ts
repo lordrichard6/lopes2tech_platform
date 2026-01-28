@@ -23,63 +23,53 @@ const supabaseAdmin = createClient(
 export async function POST(req: NextRequest) {
     try {
         // 1. Verify API Key
-        const apiKey = req.headers.get('x-api-key');
-        const expectedApiKey = process.env.PLATFORM_API_SECRET || 'fallback_secret_if_not_set';
-
-        // Allow bypassing if PLATFORM_API_SECRET is not set in dev, but in prod it must match
-        if (!process.env.PLATFORM_API_SECRET) {
-            console.warn('PLATFORM_API_SECRET not set, allowing request for dev...');
-        } else if (apiKey !== expectedApiKey) {
+        const apiKey = request.headers.get('x-api-key');
+        if (apiKey !== process.env.PLATFORM_API_SECRET) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 2. Parse Body
-        const body = await req.json();
-        const validation = ticketSchema.safeParse(body);
+        const body = await request.json();
+        const validatedData = ticketSchema.parse(body);
 
-        if (!validation.success) {
-            return NextResponse.json({ error: validation.error.format() }, { status: 400 });
-        }
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
-        const { name, email, company, phone, message, context } = validation.data;
-
-        // 3. Insert into Supabase
-        const { data, error } = await supabaseAdmin
+        const { data, error } = await supabase
             .from('tickets')
-            .insert({
-                name,
-                email,
-                company,
-                phone,
-                message,
-                context,
-                status: 'new'
-            })
+            .insert([
+                {
+                    name: validatedData.name,
+                    email: validatedData.email,
+                    company: validatedData.company,
+                    phone: validatedData.phone,
+                    message: validatedData.message,
+                    context: validatedData.context,
+                    source: validatedData.source || 'external_api',
+                },
+            ])
             .select()
             .single();
 
         if (error) {
             console.error('Supabase Insert Error:', error);
-            return NextResponse.json({ error: 'Database error' }, { status: 500 });
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true, id: data.id });
-
-        // 4. Log Activity
+        // Log the activity
         await logActivity({
             action: 'create_ticket',
-            entityType: 'system',
-            entityId: data.id,
-            metadata: {
-                ticket_id: data.id,
-                name: name,
-                email: email,
-                context: context
+            entity_type: 'ticket',
+            entity_id: data.id,
+            details: {
+                name: validatedData.name,
+                email: validatedData.email,
+                source: validatedData.source
             }
         });
 
-        return NextResponse.json({ success: true, id: data.id });
-
+        return NextResponse.json({ success: true, data });
     } catch (error) {
         console.error('API Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

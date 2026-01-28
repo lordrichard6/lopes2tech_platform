@@ -25,7 +25,9 @@ export type ActivityAction =
     | 'document_uploaded'
     | 'document_uploaded'
     | 'document_signed'
-    | 'create_ticket';
+    | 'create_ticket'
+    | 'delete_ticket'
+    | 'send_email';
 
 export type EntityType =
     | 'system'
@@ -35,7 +37,8 @@ export type EntityType =
     | 'invoice'
     | 'payment_schedule'
     | 'document'
-    | 'user';
+    | 'user'
+    | 'ticket';
 
 interface LogActivityParams {
     userId?: string;
