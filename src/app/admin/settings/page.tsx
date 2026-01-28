@@ -57,42 +57,44 @@ export default async function AdminSettingsPage() {
 
                 {/* Profile & Security Tab */}
                 <TabsContent value="profile" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Profile</CardTitle>
-                            <CardDescription>
-                                Manage your public profile information.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="flex flex-col gap-6 md:flex-row md:items-start">
-                                <div className="space-y-2">
-                                    <div className="font-medium text-sm">Avatar</div>
-                                    <AvatarUpload
-                                        uid={user.id}
-                                        url={profile.avatar_url}
-                                        size="lg"
-                                        onUploadComplete={handleAvatarUpdate}
-                                    />
+                    <div className="grid gap-4 lg:grid-cols-2">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Profile</CardTitle>
+                                <CardDescription>
+                                    Manage your public profile information.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex flex-col gap-6 md:flex-row md:items-start">
+                                    <div className="space-y-2">
+                                        <div className="font-medium text-sm">Avatar</div>
+                                        <AvatarUpload
+                                            uid={user.id}
+                                            url={profile.avatar_url}
+                                            size="lg"
+                                            onUploadComplete={handleAvatarUpdate}
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <AdminProfileForm profile={profile} />
+                                    </div>
                                 </div>
-                                <div className="flex-1 max-w-xl">
-                                    <AdminProfileForm profile={profile} />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Security</CardTitle>
-                            <CardDescription>
-                                Update your password and manage account security.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <AdminPasswordForm />
-                        </CardContent>
-                    </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Security</CardTitle>
+                                <CardDescription>
+                                    Update your password and manage account security.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <AdminPasswordForm />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </TabsContent>
 
                 {/* Business Defaults Tab */}
