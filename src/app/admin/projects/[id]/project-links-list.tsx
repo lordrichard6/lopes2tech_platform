@@ -37,35 +37,57 @@ export async function ProjectLinksList({ projectId }: { projectId: string }) {
     }
 
     return (
-        <div className="grid gap-2">
+        <div className="flex flex-wrap gap-3">
             {links.map((link) => {
                 const Icon = IconMap[link.icon] || Link2;
+                const tooltipContent = (
+                    <div className="space-y-1">
+                        <div className="font-semibold">{link.name}</div>
+                        {link.description && (
+                            <div className="text-xs text-muted-foreground max-w-[200px]">{link.description}</div>
+                        )}
+                        <div className="text-xs text-muted-foreground/80 truncate max-w-[200px]">{link.url}</div>
+                    </div>
+                );
+                
                 return (
-                    <div key={link.id} className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors group">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-md bg-background border shadow-sm">
-                                <Icon className="w-4 h-4 text-primary" />
-                            </div>
-                            <div>
-                                <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline">
-                                    {link.name}
-                                </a>
-                                {link.description && (
-                                    <p className="text-xs text-muted-foreground line-clamp-1">{link.description}</p>
-                                )}
-                            </div>
-                        </div>
-                        <form action={async (formData) => {
-                            'use server';
-                            await deleteLinkAction(formData);
-                        }}>
+                    <div key={link.id} className="relative group">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center w-12 h-12 rounded-lg border bg-card hover:bg-accent/50 transition-all hover:scale-105 hover:shadow-md"
+                                    >
+                                        <Icon className="w-5 h-5 text-primary" />
+                                    </a>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[250px]">
+                                    {tooltipContent}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <form 
+                            action={async (formData) => {
+                                'use server';
+                                await deleteLinkAction(formData);
+                            }}
+                            className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                        >
                             <input type="hidden" name="linkId" value={link.id} />
                             <input type="hidden" name="projectId" value={projectId} />
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Trash2 className="w-4 h-4" />
+                                        <Button 
+                                            type="submit" 
+                                            variant="destructive" 
+                                            size="icon" 
+                                            className="h-6 w-6 rounded-full shadow-lg"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>Delete link</TooltipContent>

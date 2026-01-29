@@ -79,6 +79,8 @@ const COUNTRY_OPTIONS = [
     { value: 'GB', label: 'United Kingdom' },
 ];
 
+const BILLING_SAME_AS_MAIN = 'same-as-main';
+
 export function EditClientDialog({ client, children }: EditClientDialogProps) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -330,14 +332,23 @@ export function EditClientDialog({ client, children }: EditClientDialogProps) {
                             <div className="space-y-2">
                                 <Label htmlFor="billing_country">Country</Label>
                                 <Select
-                                    value={formData.billing_country || ''}
-                                    onValueChange={(value) => handleChange('billing_country', value)}
+                                    value={
+                                        formData.billing_country && formData.billing_country.trim() !== ''
+                                            ? formData.billing_country
+                                            : BILLING_SAME_AS_MAIN
+                                    }
+                                    onValueChange={(value) =>
+                                        handleChange(
+                                            'billing_country',
+                                            value === BILLING_SAME_AS_MAIN ? '' : value
+                                        )
+                                    }
                                 >
                                     <SelectTrigger>
                                         <SelectValue placeholder="Same as main" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">Same as main</SelectItem>
+                                        <SelectItem value={BILLING_SAME_AS_MAIN}>Same as main</SelectItem>
                                         {COUNTRY_OPTIONS.map(opt => (
                                             <SelectItem key={opt.value} value={opt.value}>
                                                 {opt.label}

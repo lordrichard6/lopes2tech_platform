@@ -7,8 +7,10 @@ import Link from "next/link";
 import { TaskDetailsDialog } from "./task-details-dialog";
 import { cookies } from "next/headers";
 import { dictionaries, Locale } from "@/lib/i18n/dictionaries";
+import { unstable_noStore as noStore } from "next/cache";
 
 export default async function RequestsPage() {
+    noStore(); // Prevent caching to ensure deleted tasks don't appear
     const supabase = await createClient();
     const cookieStore = await cookies();
     const locale = (cookieStore.get('NEXT_LOCALE')?.value || 'en') as Locale;

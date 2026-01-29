@@ -1,6 +1,17 @@
 export type Locale = 'en' | 'pt' | 'de';
 
 export type Dictionary = {
+    notifications: {
+        title: string;
+        markAllRead: string;
+        empty: string;
+        invoiceCreatedTitle?: string;
+        invoiceCreatedMessage?: string;
+        paymentConfirmedTitle?: string;
+        paymentConfirmedMessage?: string;
+        projectCreatedTitle?: string;
+        projectCreatedMessage?: string;
+    };
     dashboard: {
         welcome: string;
         activeProjects: string;
@@ -243,6 +254,15 @@ export type Dictionary = {
 
 export const dictionaries: Record<Locale, Dictionary> = {
     en: {
+        notifications: {
+            title: "Notifications",
+            markAllRead: "Mark all read",
+            empty: "No notifications",
+            invoiceCreatedTitle: "New Invoice Received",
+            invoiceCreatedMessage: "An invoice for {currency} {amount} is now available.",
+            paymentConfirmedTitle: "Payment Confirmed",
+            paymentConfirmedMessage: "We have recorded your payment of {currency} {amount}.",
+        },
         settings: {
             title: "Settings",
             description: "Manage your account settings and preferences.",
@@ -484,6 +504,40 @@ export const dictionaries: Record<Locale, Dictionary> = {
         },
     },
     pt: {
+        notifications: {
+            title: "Notificações",
+            markAllRead: "Marcar tudo como lido",
+            empty: "Sem notificações",
+            invoiceCreatedTitle: "Nova fatura disponível",
+            invoiceCreatedMessage: "Uma fatura de {currency} {amount} já está disponível.",
+            paymentConfirmedTitle: "Pagamento registado",
+            paymentConfirmedMessage: "O seu pagamento de {currency} {amount} foi registado.",
+            projectCreatedTitle: "Projeto criado",
+            projectCreatedMessage: "O seu pedido \"{title}\" foi convertido num projeto.",
+        },
+        dashboard: {
+            welcome: "Bem-vindo de volta",
+            activeProjects: "Projetos Ativos",
+            pendingInvoices: "Faturas Pendentes",
+            sharedDocuments: "Documentos",
+            totalProjects: "projetos total",
+            pending: "pendentes",
+            filesAvailable: "arquivos disponíveis",
+            quickActions: "Ações Rápidas",
+            viewDocuments: "Ver Documentos",
+            editProfile: "Editar Perfil",
+            contactSupport: "Contatar Suporte",
+            profile: "Perfil",
+            settings: "Configurações",
+            signOut: "Sair",
+            theme: {
+                title: "Cor do Tema",
+                horizon: "Azul Profundo",
+                sunset: "Pôr do Sol",
+                forest: "Floresta",
+                neutral: "Neutro",
+            },
+        },
         settings: {
             title: "Configurações",
             description: "Gerencie as configurações e preferências da sua conta.",

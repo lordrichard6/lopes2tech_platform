@@ -106,15 +106,21 @@ export async function confirmPaymentAction(scheduleId: string, invoiceId: string
     // Actually, I'll fetch it to be safe or rely on the fact that I can't easily change the top query in this replace chunk.
     // I will do a quick fetch.
     if (schedule.invoice?.clients) {
-        const { data: clientData } = await supabase.from('clients').select('profile_id').eq('contact_email', schedule.invoice.clients.contact_email).single();
+        const { data: clientData } = await supabase
+            .from('clients')
+            .select('profile_id')
+            .eq('contact_email', schedule.invoice.clients.contact_email)
+            .single();
+
         if (clientData?.profile_id) {
             const { sendNotification } = await import('@/lib/notifications');
             await sendNotification({
                 userId: clientData.profile_id,
                 type: 'payment_confirmed',
                 title: 'Payment Confirmed',
-                message: `We received your payment of ${schedule.invoice.currency} ${schedule.amount.toFixed(2)}.`,
-                link: `/invoices/${invoiceId}`
+                // From the client's perspective: their payment has been recorded
+                message: `Your payment of ${schedule.invoice.currency} ${schedule.amount.toFixed(2)} has been recorded.`,
+                link: `/invoices/${invoiceId}`,
             });
         }
     }

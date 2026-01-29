@@ -35,7 +35,7 @@ export function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const supabase = createClient();
     const router = useRouter();
-    // const { t } = useLanguage(); // Optional: Add translations later
+    const { t } = useLanguage();
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -113,7 +113,9 @@ export function NotificationBell() {
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="end">
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h4 className="font-semibold leading-none">Notifications</h4>
+                    <h4 className="font-semibold leading-none">
+                        {t.notifications?.title ?? "Notifications"}
+                    </h4>
                     {unreadCount > 0 && (
                         <Button
                             variant="ghost"
@@ -121,14 +123,14 @@ export function NotificationBell() {
                             className="text-xs h-auto p-0 text-muted-foreground hover:text-primary"
                             onClick={handleMarkAllRead}
                         >
-                            Mark all read
+                            {t.notifications?.markAllRead ?? "Mark all read"}
                         </Button>
                     )}
                 </div>
                 <ScrollArea className="h-[300px]">
                     {notifications.length === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
-                            No notifications
+                            {t.notifications?.empty ?? "No notifications"}
                         </div>
                     ) : (
                         <div className="grid">

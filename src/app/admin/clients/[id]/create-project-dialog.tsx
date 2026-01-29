@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -40,6 +40,15 @@ interface Service {
 interface CreateProjectDialogProps {
     clientId: string
     availableServices: Service[]
+    initialData?: {
+        name?: string
+        description?: string
+        budget?: number
+    }
+    taskId?: string // Optional: task ID to link after creation
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    trigger?: React.ReactNode
 }
 
 const formSchema = z.object({
@@ -51,12 +60,24 @@ const formSchema = z.object({
     service_ids: z.array(z.string()).default([]),
 })
 
-export function CreateProjectDialog({ clientId, availableServices }: CreateProjectDialogProps) {
-    const [open, setOpen] = useState(false)
+export function CreateProjectDialog({ 
+    clientId, 
+    availableServices, 
+    initialData,
+    taskId,
+    open: controlledOpen,
+    onOpenChange: controlledOnOpenChange,
+    trigger
+}: CreateProjectDialogProps) {
+    const [internalOpen, setInternalOpen] = useState(false)
     const [step, setStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const router = useRouter()
+
+    // Use controlled or internal state
+    const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+    const setOpen = controlledOnOpenChange || setInternalOpen
 
     const oneTimeServices = availableServices.filter(s => s.billing_type === 'one_time')
     const filteredServices = oneTimeServices.filter(s =>
@@ -66,14 +87,28 @@ export function CreateProjectDialog({ clientId, availableServices }: CreateProje
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            description: "",
-            budget: 0,
+            name: initialData?.name || "",
+            description: initialData?.description || "",
+            budget: initialData?.budget || 0,
             start_date: new Date().toISOString().split('T')[0],
             deadline: "",
             service_ids: [],
         },
     })
+
+    // Reset form when dialog opens with initial data
+    useEffect(() => {
+        if (open && initialData) {
+            form.reset({
+                name: initialData.name || "",
+                description: initialData.description || "",
+                budget: initialData.budget || 0,
+                start_date: new Date().toISOString().split('T')[0],
+                deadline: "",
+                service_ids: [],
+            })
+        }
+    }, [open, initialData, form])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (step === 1) {
@@ -85,7 +120,8 @@ export function CreateProjectDialog({ clientId, availableServices }: CreateProje
         const result = await createProjectAction({
             client_id: clientId,
             ...values,
-            budget: values.budget || 0
+            budget: values.budget || 0,
+            task_id: taskId
         })
 
         if (result.error) {
@@ -96,6 +132,10 @@ export function CreateProjectDialog({ clientId, availableServices }: CreateProje
             setStep(1)
             form.reset()
             router.refresh()
+            // If we have a project ID, redirect to it
+            if (result.projectId) {
+                router.push(`/admin/projects/${result.projectId}`)
+            }
         }
         setIsLoading(false)
     }
@@ -109,11 +149,17 @@ export function CreateProjectDialog({ clientId, availableServices }: CreateProje
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" /> Add Project
-                </Button>
-            </DialogTrigger>
+            {trigger ? (
+                <DialogTrigger asChild>
+                    {trigger}
+                </DialogTrigger>
+            ) : (
+                <DialogTrigger asChild>
+                    <Button size="sm">
+                        <Plus className="mr-2 h-4 w-4" /> Add Project
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle>{step === 1 ? 'Project Details' : 'Select Services'}</DialogTitle>
