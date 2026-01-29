@@ -24,8 +24,10 @@ import { CreateHandoverDialog } from "./create-handover-dialog";
 import { CreateSupportDialog } from "./create-support-dialog";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { unstable_noStore } from "next/cache";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    unstable_noStore(); // Prevent caching to ensure fresh data
     const { id } = await params;
     const supabase = await createClient();
 

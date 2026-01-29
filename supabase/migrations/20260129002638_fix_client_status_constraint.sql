@@ -1,14 +1,17 @@
--- Update client status to sales funnel approach (Option B)
--- Old: lead, pre-approval, in-development, completed, maintenance, inactive, churned
--- New: lead, qualified, proposal, client, vip, inactive, churned
+-- Fix client status constraint migration
+-- This handles the case where the previous migration partially failed
 
--- Drop the old constraint FIRST before updating
+-- Drop the constraint if it exists (in case it's the old or new one)
 ALTER TABLE public.clients DROP CONSTRAINT IF EXISTS clients_status_check;
 
--- Map existing statuses to new ones
+-- Map any remaining old statuses to new ones
 UPDATE public.clients SET status = 'proposal' WHERE status = 'pre-approval';
 UPDATE public.clients SET status = 'client' WHERE status IN ('in-development', 'completed', 'maintenance');
--- 'lead', 'inactive', 'churned' remain the same
+
+-- Ensure all statuses are valid (set invalid ones to 'lead' as default)
+UPDATE public.clients SET status = 'lead' 
+WHERE status IS NULL 
+   OR status NOT IN ('lead', 'qualified', 'proposal', 'client', 'vip', 'inactive', 'churned');
 
 -- Add the new constraint
 ALTER TABLE public.clients 

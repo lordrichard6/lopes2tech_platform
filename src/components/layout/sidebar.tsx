@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
@@ -35,12 +36,21 @@ export function Sidebar({ links, bottomLinks }: SidebarProps) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className={cn(
-                "flex h-14 items-center justify-center border-b px-4 shrink-0",
-                isHovered ? "justify-start" : "justify-center"
-            )}>
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-cyan-500/20">
-                    L
+            <div
+                className={cn(
+                    "flex h-14 items-center justify-center border-b px-4 shrink-0",
+                    isHovered ? "justify-start" : "justify-center"
+                )}
+            >
+                <div className="relative h-11 w-11 shrink-0 flex items-center justify-center translate-x-[2px]">
+                    <Image
+                        src="/logo_w.png"
+                        alt="Lopes2Tech"
+                        fill
+                        sizes="44px"
+                        className="object-contain object-center rounded-lg"
+                        priority
+                    />
                 </div>
                 <span className={cn(
                     "ml-2 font-bold text-lg whitespace-nowrap overflow-hidden transition-all duration-300",

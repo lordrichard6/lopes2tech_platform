@@ -15,8 +15,19 @@ export const metadata: Metadata = {
     default: "Lopes2Tech Platform",
     template: "%s | Lopes2Tech"
   },
-  description: "Swiss IT Solutions & Automation | Client Portal",
-  keywords: ["IT Solutions", "Automation", "Swiss", "Zurich", "Software Development", "Client Portal"],
+  description: "Swiss IT Solutions & Automation | Client Portal, web design automations SAAS and web apps.",
+  keywords: [
+    "IT Solutions",
+    "Automation",
+    "Swiss",
+    "Zurich",
+    "Software Development",
+    "Client Portal",
+    "Web Design",
+    "Automations",
+    "SAAS",
+    "Web Apps"
+  ],
   authors: [{ name: "Paulo Lopes", url: "https://lopes2tech.ch" }],
   creator: "Lopes2Tech",
   metadataBase: new URL("https://app.lopes2tech.ch"),
@@ -25,7 +36,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://app.lopes2tech.ch",
     title: "Lopes2Tech Platform",
-    description: "Secure Client Portal for Lopes2Tech Services",
+    description: "Secure Client Portal for Lopes2Tech Services, including web design automations SAAS and web apps.",
     siteName: "Lopes2Tech Area",
     images: [
       {
@@ -39,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Lopes2Tech Platform",
-    description: "Secure Client Portal for Lopes2Tech Services",
+    description: "Secure Client Portal for Lopes2Tech Services, including web design automations SAAS and web apps.",
     images: ["/logo.png"],
     creator: "@lopes2tech",
   },

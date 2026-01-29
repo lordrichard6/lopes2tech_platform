@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClientTable } from "./client-table";
 import { ClientImportExport } from "./client-import-export";
+import { unstable_noStore } from "next/cache";
 
 export default async function AdminClientsPage() {
+    unstable_noStore(); // Prevent caching to ensure fresh data
     const supabase = await createClient();
     const { data: clients, error } = await supabase
         .from("clients")
