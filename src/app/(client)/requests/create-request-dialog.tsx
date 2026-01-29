@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,13 +23,23 @@ import {
 } from "@/components/ui/select";
 import { Plus, Loader2 } from "lucide-react";
 import { createTaskAction } from "./actions";
-import { toast } from "sonner"; // Assuming sonner is used, typical in shadcn/ui setups. If not, can fallback to alert or other.
+import { toast } from "sonner";
 import { useLanguage } from "@/contexts/language-context";
 
-export function CreateRequestDialog() {
+export type CreateRequestDialogRef = { open: () => void };
+
+interface CreateRequestDialogProps {
+    /** When true, no trigger is rendered; use ref.current.open() to open. */
+    externalTrigger?: boolean;
+}
+
+export const CreateRequestDialog = forwardRef<CreateRequestDialogRef, CreateRequestDialogProps>(
+    function CreateRequestDialog({ externalTrigger }, ref) {
     const { t } = useLanguage();
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    useImperativeHandle(ref, () => ({ open: () => setOpen(true) }), []);
 
     const handleSubmit = async (formData: FormData) => {
         setIsLoading(true);
@@ -51,12 +61,13 @@ export function CreateRequestDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t.requests.newRequest}
-                </Button>
-            </DialogTrigger>
+            {!externalTrigger && (
+                <DialogTrigger asChild>
+                    <Button size="icon" className="h-9 w-9 shrink-0 rounded-lg" aria-label={t.requests.newRequest}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{t.requests.dialog.title}</DialogTitle>
@@ -110,5 +121,28 @@ export function CreateRequestDialog() {
                 </form>
             </DialogContent>
         </Dialog>
+    );
+});
+
+/** On small devices: fixed FAB bottom-right. On md+: inline button in header. */
+export function RequestsCreateWithFab() {
+    const { t } = useLanguage();
+    const dialogRef = useRef<CreateRequestDialogRef>(null);
+
+    return (
+        <>
+            <div className="hidden md:block shrink-0">
+                <CreateRequestDialog />
+            </div>
+            <Button
+                size="icon"
+                className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-2xl shadow-lg shadow-primary/25 md:hidden"
+                aria-label={t.requests.newRequest}
+                onClick={() => dialogRef.current?.open()}
+            >
+                <Plus className="h-6 w-6" />
+            </Button>
+            <CreateRequestDialog ref={dialogRef} externalTrigger />
+        </>
     );
 }

@@ -28,14 +28,23 @@ export function LanguageSwitcher() {
                     <span className="absolute bottom-1 right-1 text-[9px] font-bold uppercase leading-none">{locale}</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLocale('en')} className={locale === 'en' ? 'bg-accent' : ''}>
+            <DropdownMenuContent align="end" className="min-w-[140px]">
+                <DropdownMenuItem 
+                    onClick={() => setLocale('en')} 
+                    className={`py-3 sm:py-2 text-base sm:text-sm cursor-pointer ${locale === 'en' ? 'bg-accent' : ''}`}
+                >
                     🇺🇸 English
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocale('pt')} className={locale === 'pt' ? 'bg-accent' : ''}>
+                <DropdownMenuItem 
+                    onClick={() => setLocale('pt')} 
+                    className={`py-3 sm:py-2 text-base sm:text-sm cursor-pointer ${locale === 'pt' ? 'bg-accent' : ''}`}
+                >
                     🇵🇹 Português
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocale('de')} className={locale === 'de' ? 'bg-accent' : ''}>
+                <DropdownMenuItem 
+                    onClick={() => setLocale('de')} 
+                    className={`py-3 sm:py-2 text-base sm:text-sm cursor-pointer ${locale === 'de' ? 'bg-accent' : ''}`}
+                >
                     🇨🇭 Deutsch
                 </DropdownMenuItem>
             </DropdownMenuContent>

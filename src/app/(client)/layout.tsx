@@ -1,10 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ClientSidebar } from "@/components/layout/client-sidebar";
-import { DashboardUserMenu } from "@/components/layout/dashboard-user-menu";
+import { ClientHeader } from "@/components/layout/client-header";
 import { LanguageProvider } from "@/contexts/language-context";
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export default async function DashboardLayout({
     children,
@@ -51,20 +49,12 @@ export default async function DashboardLayout({
         <LanguageProvider>
             <div className="flex min-h-screen">
                 <ClientSidebar />
-                <div className="flex-1 flex flex-col pl-16 transition-all duration-300">
-                    <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                        <div className="container flex h-14 items-center justify-end px-4">
-                            <div className="flex items-center gap-3 h-full">
-                                <LanguageSwitcher />
-                                <NotificationBell />
-                                <DashboardUserMenu
-                                    email={user.email || ''}
-                                    avatarUrl={avatarUrl}
-                                    clientName={clientName}
-                                />
-                            </div>
-                        </div>
-                    </header>
+                <div className="flex-1 flex flex-col pl-0 md:pl-16 transition-all duration-300">
+                    <ClientHeader
+                        email={user.email || ''}
+                        avatarUrl={avatarUrl}
+                        clientName={clientName}
+                    />
                     <main className="flex-1 container py-6 mx-auto px-4 sm:px-6 lg:px-8">
                         {children}
                     </main>

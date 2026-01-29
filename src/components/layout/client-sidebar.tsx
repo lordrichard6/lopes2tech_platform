@@ -15,5 +15,5 @@ export function ClientSidebar() {
         { title: t.sidebar.subscriptions, href: '/subscriptions', icon: CreditCard },
     ];
 
-    return <Sidebar links={links} />;
+    return <Sidebar links={links} className="hidden md:flex" />;
 }

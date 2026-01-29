@@ -43,22 +43,22 @@ export function DashboardUserMenu({ email, avatarUrl, clientName }: DashboardUse
                     <span className="text-sm font-medium hidden md:inline-block whitespace-nowrap">{clientName}</span>
                 </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>{clientName}</DropdownMenuLabel>
-                <div className="px-2 pb-2 text-xs text-muted-foreground truncate">
+            <DropdownMenuContent align="end" className="w-64 sm:w-56">
+                <DropdownMenuLabel className="py-3 text-base sm:text-sm font-semibold">{clientName}</DropdownMenuLabel>
+                <div className="px-2 pb-3 text-sm sm:text-xs text-muted-foreground truncate">
                     {email}
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 sm:py-2">
                     <Link href="/settings" className="cursor-pointer">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>{t.dashboard.settings}</span>
+                        <Settings className="mr-3 sm:mr-2 h-5 w-5 sm:h-4 sm:w-4" />
+                        <span className="text-base sm:text-sm">{t.dashboard.settings}</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>{t.dashboard.signOut}</span>
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive py-3 sm:py-2">
+                    <LogOut className="mr-3 sm:mr-2 h-5 w-5 sm:h-4 sm:w-4" />
+                    <span className="text-base sm:text-sm">{t.dashboard.signOut}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

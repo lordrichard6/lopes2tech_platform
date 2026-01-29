@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { FolderKanban, FileText, Receipt, ArrowRight, Download } from "lucide-react";
+import { FolderKanban, FileText, Receipt, ArrowRight, Download, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ClientDashboardViewProps {
     clientName: string;
@@ -33,110 +34,152 @@ export function ClientDashboardView({
 }: ClientDashboardViewProps) {
     const { t } = useLanguage();
 
-    // Greeting logic (translated)
-    // We can use simple time logic locally, or just rely on 'welcome' from dict
-    // But 'Good morning' etc needs keys if we want that detail.
-    // Dictionaries have 'welcome'. Let's use `t.dashboard.welcome`.
+    // Time-based greeting using local time and translated phrases
+    const hour = new Date().getHours();
+    const isMorning = hour < 12;
+    const greeting = isMorning ? t.dashboard.greetingMorning : t.dashboard.greetingAfternoon;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Welcome Section */}
             <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    {t.dashboard.welcome}, {clientName.split(' ')[0]}! 👋
-                </h1>
-                <p className="text-muted-foreground">
-                    {t.auth.subtitle} {/* reusing "Enter credentials..." isn't quite right, let's use a generic subtitle if available or static fallback */}
-                    {/* Actually dictionary checks: */}
-                    {/* t.dashboard.welcome is "Welcome back" */}
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-[0.2em]">
+                    {t.dashboard.pageTitle}
                 </p>
+                <h1 className="text-3xl font-bold tracking-tight">
+                    {greeting}, {clientName.split(' ')[0]}! 👋
+                </h1>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t.dashboard.activeProjects}</CardTitle>
-                        <FolderKanban className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{activeProjectsCount}</div>
-                        <p className="text-xs text-muted-foreground">
-                            {totalProjectsCount} {t.dashboard.totalProjects}
-                        </p>
-                    </CardContent>
-                </Card>
+            {/* Stats Cards – compact on small devices, full on md+ */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
+                <Link href="/projects" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg">
+                    <Card className={cn(
+                        "h-full transition-all duration-200 py-3 px-3 gap-2 md:py-6 md:gap-6 md:px-6",
+                        "hover:border-primary/40 hover:shadow-md hover:shadow-primary/5",
+                        "cursor-pointer group"
+                    )}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-1 md:pb-2">
+                            <CardTitle className="text-xs font-medium md:text-sm line-clamp-1">{t.dashboard.activeProjects}</CardTitle>
+                            <span className="flex h-7 w-7 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                                <FolderKanban className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                            </span>
+                        </CardHeader>
+                        <CardContent className="p-0 pt-0">
+                            <div className="text-xl font-bold tracking-tight md:text-3xl">{activeProjectsCount}</div>
+                            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                {totalProjectsCount} {t.dashboard.totalProjects}
+                            </p>
+                            <p className="text-xs text-primary font-medium mt-1 md:mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 hidden sm:flex">
+                                {t.projects.viewDetails} <ChevronRight className="h-3.5 w-3.5" />
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t.dashboard.pendingInvoices}</CardTitle>
-                        <Receipt className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {pendingInvoicesCount > 0 ? `CHF ${pendingAmount.toFixed(0)}` : t.invoices.statusMap.paid}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            {pendingInvoicesCount} {t.dashboard.pending}
-                        </p>
-                    </CardContent>
-                </Card>
+                <Link href="/invoices" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg">
+                    <Card className={cn(
+                        "h-full transition-all duration-200 py-3 px-3 gap-2 md:py-6 md:gap-6 md:px-6",
+                        "hover:border-primary/40 hover:shadow-md hover:shadow-primary/5",
+                        "cursor-pointer group"
+                    )}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-1 md:pb-2">
+                            <CardTitle className="text-xs font-medium md:text-sm line-clamp-1">{t.dashboard.pendingInvoices}</CardTitle>
+                            <span className="flex h-7 w-7 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                                <Receipt className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                            </span>
+                        </CardHeader>
+                        <CardContent className="p-0 pt-0">
+                            <div className="text-xl font-bold tracking-tight md:text-3xl">
+                                {pendingInvoicesCount > 0 ? `CHF ${pendingAmount.toFixed(0)}` : t.invoices.statusMap.paid}
+                            </div>
+                            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                {pendingInvoicesCount} {t.dashboard.pending}
+                            </p>
+                            <p className="text-xs text-primary font-medium mt-1 md:mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 hidden sm:flex">
+                                {t.projects.viewDetails} <ChevronRight className="h-3.5 w-3.5" />
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t.dashboard.sharedDocuments}</CardTitle>
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{documentCount}</div>
-                        <p className="text-xs text-muted-foreground">
-                            {t.dashboard.filesAvailable}
-                        </p>
-                    </CardContent>
-                </Card>
+                <Link href="/documents" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg">
+                    <Card className={cn(
+                        "h-full transition-all duration-200 py-3 px-3 gap-2 md:py-6 md:gap-6 md:px-6",
+                        "hover:border-primary/40 hover:shadow-md hover:shadow-primary/5",
+                        "cursor-pointer group"
+                    )}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-1 md:pb-2">
+                            <CardTitle className="text-xs font-medium md:text-sm line-clamp-1">{t.dashboard.sharedDocuments}</CardTitle>
+                            <span className="flex h-7 w-7 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                                <FileText className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                            </span>
+                        </CardHeader>
+                        <CardContent className="p-0 pt-0">
+                            <div className="text-xl font-bold tracking-tight md:text-3xl">{documentCount}</div>
+                            <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                {t.dashboard.filesAvailable}
+                            </p>
+                            <p className="text-xs text-primary font-medium mt-1 md:mt-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 hidden sm:flex">
+                                {t.projects.viewDetails} <ChevronRight className="h-3.5 w-3.5" />
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                 {/* Projects Section */}
                 <Card className="lg:col-span-1">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>{t.projects.title}</CardTitle>
-                            <CardDescription>{t.projects.subtitle}</CardDescription>
+                    <CardHeader className="flex flex-row items-start sm:items-center justify-between gap-2 pb-3 sm:pb-6">
+                        <div className="min-w-0 flex-1">
+                            <CardTitle className="text-base sm:text-lg">{t.projects.title}</CardTitle>
+                            <CardDescription className="text-xs sm:text-sm mt-0.5">{t.projects.subtitle}</CardDescription>
                         </div>
-                        <Button variant="ghost" size="sm" asChild>
-                            <Link href="/projects" className="gap-1">
-                                {t.projects.viewDetails} <ArrowRight className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg" asChild aria-label={t.projects.viewDetails}>
+                            <Link href="/projects">
+                                <ArrowRight className="h-4 w-4" />
                             </Link>
                         </Button>
                     </CardHeader>
                     <CardContent>
                         {projects?.length ? (
-                            <div className="space-y-4">
+                            <div className="space-y-2 sm:space-y-3">
                                 {projects.map((project) => (
-                                    <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                                        <div className="space-y-1">
-                                            <p className="font-medium">{project.name}</p>
-                                            <div className="flex items-center gap-2">
-                                                <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                                                    {t.projects.statusMap[project.status as keyof typeof t.projects.statusMap] || project.status}
-                                                </Badge>
-                                                <span className="text-xs text-muted-foreground">{project.progress}% {t.projects.progress}</span>
+                                    <Link
+                                        key={project.id}
+                                        href={`/projects/${project.id}`}
+                                        className={cn(
+                                            "block rounded-lg border bg-card transition-colors",
+                                            "p-2.5 sm:p-3 hover:bg-muted/50 hover:border-primary/30",
+                                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                        )}
+                                    >
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                            <div className="min-w-0 flex-1 space-y-1.5">
+                                                <p className="font-medium text-sm sm:text-base truncate">{project.name}</p>
+                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                    <Badge variant={project.status === 'active' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs w-fit">
+                                                        {t.projects.statusMap[project.status as keyof typeof t.projects.statusMap] || project.status}
+                                                    </Badge>
+                                                    <span className="text-[10px] sm:text-xs text-muted-foreground">{project.progress}% {t.projects.progress}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 sm:gap-3">
+                                                <div className="flex-1 sm:flex-none sm:w-20 h-1.5 sm:h-2 bg-secondary rounded-full overflow-hidden min-w-0">
+                                                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${project.progress}%` }} />
+                                                </div>
+                                                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 sm:hidden" aria-hidden />
                                             </div>
                                         </div>
-                                        <div className="w-20">
-                                            <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                                                <div className="h-full bg-primary" style={{ width: `${project.progress}%` }} />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <FolderKanban className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>{t.common.noData}</p>
+                            <div className="text-center py-6 sm:py-8 text-muted-foreground">
+                                <FolderKanban className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 opacity-50" />
+                                <p className="text-sm">{t.common.noData}</p>
                             </div>
                         )}
                     </CardContent>
@@ -144,14 +187,14 @@ export function ClientDashboardView({
 
                 {/* Documents Section */}
                 <Card className="lg:col-span-1">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>{t.documents.title}</CardTitle>
-                            <CardDescription>{t.documents.subtitle}</CardDescription>
+                    <CardHeader className="flex flex-row items-start sm:items-center justify-between gap-2 pb-3 sm:pb-6">
+                        <div className="min-w-0 flex-1">
+                            <CardTitle className="text-base sm:text-lg">{t.documents.title}</CardTitle>
+                            <CardDescription className="text-xs sm:text-sm mt-0.5">{t.documents.subtitle}</CardDescription>
                         </div>
-                        <Button variant="ghost" size="sm" asChild>
-                            <Link href="/documents" className="gap-1">
-                                {t.projects.viewDetails} <ArrowRight className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-lg" asChild aria-label={t.projects.viewDetails}>
+                            <Link href="/documents">
+                                <ArrowRight className="h-4 w-4" />
                             </Link>
                         </Button>
                     </CardHeader>

@@ -16,9 +16,10 @@ export interface SidebarLink {
 interface SidebarProps {
     links: SidebarLink[];
     bottomLinks?: SidebarLink[]; // For settings, logout etc if needed structurally
+    className?: string; // e.g. "hidden md:flex" for client mobile
 }
 
-export function Sidebar({ links, bottomLinks }: SidebarProps) {
+export function Sidebar({ links, bottomLinks, className }: SidebarProps) {
     const pathname = usePathname();
     const [isHovered, setIsHovered] = useState(false);
 
@@ -31,7 +32,8 @@ export function Sidebar({ links, bottomLinks }: SidebarProps) {
         <aside
             className={cn(
                 "fixed left-0 top-0 z-40 h-[100dvh] bg-card border-r transition-all duration-300 ease-in-out flex flex-col",
-                isHovered ? "w-64" : "w-16"
+                isHovered ? "w-64" : "w-16",
+                className
             )}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

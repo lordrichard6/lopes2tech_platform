@@ -13,7 +13,10 @@ export type Dictionary = {
         projectCreatedMessage?: string;
     };
     dashboard: {
+        pageTitle: string;
         welcome: string;
+        greetingMorning: string;
+        greetingAfternoon: string;
         activeProjects: string;
         pendingInvoices: string;
         sharedDocuments: string;
@@ -112,6 +115,11 @@ export type Dictionary = {
         loading: string;
         error: string;
         noData: string;
+        cancel: string;
+        save: string;
+        create: string;
+        delete: string;
+        rename: string;
     };
     sidebar: {
         dashboard: string;
@@ -135,6 +143,22 @@ export type Dictionary = {
             uploading: string;
             success: string;
         };
+        // Folder-related
+        root: string;
+        emptyFolder: string;
+        newFolder: string;
+        newFolderDesc: string;
+        folderName: string;
+        folderNamePlaceholder: string;
+        folderCreated: string;
+        folderRenamed: string;
+        folderDeleted: string;
+        deleteFolder: string;
+        deleteFolderDesc: string;
+        moveTo: string;
+        documentMoved: string;
+        noFolders: string;
+        openInNewTab: string;
     };
     settings: {
         title: string;
@@ -378,7 +402,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             noPaymentsYet: "No payments recorded yet. Payments will appear here after payment is processed.",
         },
         dashboard: {
+            pageTitle: "Dashboard",
             welcome: "Welcome back",
+            greetingMorning: "Good morning",
+            greetingAfternoon: "Good afternoon",
             activeProjects: "Active Projects",
             pendingInvoices: "Pending Invoices",
             sharedDocuments: "Shared Documents",
@@ -477,6 +504,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
             loading: "Loading...",
             error: "An error occurred",
             noData: "No data found",
+            cancel: "Cancel",
+            save: "Save",
+            create: "Create",
+            delete: "Delete",
+            rename: "Rename",
         },
         sidebar: {
             dashboard: "Dashboard",
@@ -501,6 +533,21 @@ export const dictionaries: Record<Locale, Dictionary> = {
                 uploading: "Uploading...",
                 success: "Document uploaded successfully",
             },
+            root: "Root",
+            emptyFolder: "This folder is empty",
+            newFolder: "New Folder",
+            newFolderDesc: "Create a new folder to organize your documents.",
+            folderName: "Folder name",
+            folderNamePlaceholder: "My Folder",
+            folderCreated: "Folder created",
+            folderRenamed: "Folder renamed",
+            folderDeleted: "Folder deleted",
+            deleteFolder: "Delete Folder",
+            deleteFolderDesc: "Are you sure? Documents inside will be moved to the root folder.",
+            moveTo: "Move to...",
+            documentMoved: "Document moved",
+            noFolders: "No folders available",
+            openInNewTab: "Open in new tab",
         },
     },
     pt: {
@@ -516,7 +563,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             projectCreatedMessage: "O seu pedido \"{title}\" foi convertido num projeto.",
         },
         dashboard: {
+            pageTitle: "Painel",
             welcome: "Bem-vindo de volta",
+            greetingMorning: "Bom dia",
+            greetingAfternoon: "Boa tarde",
             activeProjects: "Projetos Ativos",
             pendingInvoices: "Faturas Pendentes",
             sharedDocuments: "Documentos",
@@ -653,7 +703,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             noPaymentsYet: "Nenhum pagamento registrado ainda. Os pagamentos aparecerão aqui após o processamento.",
         },
         dashboard: {
+            pageTitle: "Painel",
             welcome: "Bem-vindo de volta",
+            greetingMorning: "Bom dia",
+            greetingAfternoon: "Boa tarde",
             activeProjects: "Projetos Ativos",
             pendingInvoices: "Faturas Pendentes",
             sharedDocuments: "Documentos",
@@ -752,6 +805,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
             loading: "Carregando...",
             error: "Ocorreu um erro",
             noData: "Nenhum dado encontrado",
+            cancel: "Cancelar",
+            save: "Salvar",
+            create: "Criar",
+            delete: "Excluir",
+            rename: "Renomear",
         },
         sidebar: {
             dashboard: "Painel",
@@ -776,6 +834,20 @@ export const dictionaries: Record<Locale, Dictionary> = {
                 uploading: "Enviando...",
                 success: "Documento enviado com sucesso",
             },
+            root: "Raiz",
+            emptyFolder: "Esta pasta está vazia",
+            newFolder: "Nova Pasta",
+            newFolderDesc: "Crie uma nova pasta para organizar seus documentos.",
+            folderName: "Nome da pasta",
+            folderNamePlaceholder: "Minha Pasta",
+            folderCreated: "Pasta criada",
+            folderRenamed: "Pasta renomeada",
+            folderDeleted: "Pasta excluída",
+            deleteFolder: "Excluir Pasta",
+            deleteFolderDesc: "Tem certeza? Os documentos dentro serão movidos para a pasta raiz.",
+            moveTo: "Mover para...",
+            documentMoved: "Documento movido",
+            noFolders: "Nenhuma pasta disponível",
         },
     },
     de: {
@@ -894,7 +966,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
             noPaymentsYet: "Noch keine Zahlungen erfasst. Zahlungen werden hier nach der Verarbeitung angezeigt.",
         },
         dashboard: {
+            pageTitle: "Dashboard",
             welcome: "Willkommen zurück",
+            greetingMorning: "Guten Morgen",
+            greetingAfternoon: "Guten Tag",
             activeProjects: "Aktive Projekte",
             pendingInvoices: "Offene Rechnungen",
             sharedDocuments: "Dokumente",
@@ -993,6 +1068,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
             loading: "Laden...",
             error: "Ein Fehler ist aufgetreten",
             noData: "Keine Daten gefunden",
+            cancel: "Abbrechen",
+            save: "Speichern",
+            create: "Erstellen",
+            delete: "Löschen",
+            rename: "Umbenennen",
         },
         sidebar: {
             dashboard: "Dashboard",
@@ -1017,6 +1097,21 @@ export const dictionaries: Record<Locale, Dictionary> = {
                 uploading: "Lädt hoch...",
                 success: "Dokument erfolgreich hochgeladen",
             },
+            root: "Stammverzeichnis",
+            emptyFolder: "Dieser Ordner ist leer",
+            newFolder: "Neuer Ordner",
+            newFolderDesc: "Erstellen Sie einen neuen Ordner, um Ihre Dokumente zu organisieren.",
+            folderName: "Ordnername",
+            folderNamePlaceholder: "Mein Ordner",
+            folderCreated: "Ordner erstellt",
+            folderRenamed: "Ordner umbenannt",
+            folderDeleted: "Ordner gelöscht",
+            deleteFolder: "Ordner löschen",
+            deleteFolderDesc: "Sind Sie sicher? Dokumente im Ordner werden ins Stammverzeichnis verschoben.",
+            moveTo: "Verschieben nach...",
+            documentMoved: "Dokument verschoben",
+            noFolders: "Keine Ordner verfügbar",
+            openInNewTab: "In neuem Tab öffnen",
         },
     },
 };

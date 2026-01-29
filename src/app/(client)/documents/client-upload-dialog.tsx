@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from "react"
-import { createClient } from "@/lib/supabase/client"
-import { addClientDocumentRecord } from "./actions"
+import { useState, forwardRef, useImperativeHandle, useRef } from "react"
+import { uploadClientDocument } from "./actions"
+import { CreateFolderDialog, type CreateFolderDialogRef } from "./create-folder-dialog"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,49 +23,51 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Upload, Loader2, FileText, X } from "lucide-react"
+import { Upload, Loader2, FileText, FolderPlus } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import { toast } from "sonner"
+
+export type ClientUploadDialogRef = { open: () => void }
 
 interface ClientUploadDialogProps {
     clientId: string;
     projects: { id: string, name: string }[];
+    /** When true, no trigger is rendered; use ref.current.open() to open. */
+    externalTrigger?: boolean;
+    /** Current folder to upload into */
+    currentFolderId?: string | null;
 }
 
-export function ClientUploadDialog({ clientId, projects }: ClientUploadDialogProps) {
+export const ClientUploadDialog = forwardRef<ClientUploadDialogRef, ClientUploadDialogProps>(
+    function ClientUploadDialog({ clientId, projects, externalTrigger, currentFolderId }, ref) {
     const { t } = useLanguage()
     const [open, setOpen] = useState(false)
+
+    useImperativeHandle(ref, () => ({ open: () => setOpen(true) }), [])
     const [file, setFile] = useState<File | null>(null)
     const [projectId, setProjectId] = useState<string>("")
     const [isUploading, setIsUploading] = useState(false)
     const router = useRouter()
-    const supabase = createClient()
 
     const handleUpload = async () => {
         if (!file) return
 
         try {
             setIsUploading(true)
-            const fileExt = file.name.split('.').pop()
-            // Path convention: client_id/timestamp-random.ext
-            const fileName = `${clientId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+            
+            // Create FormData for server action
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('client_id', clientId)
+            if (projectId && projectId !== 'no-project') {
+                formData.append('project_id', projectId)
+            }
+            if (currentFolderId) {
+                formData.append('folder_id', currentFolderId)
+            }
 
-            // 1. Upload to Storage
-            const { error: uploadError } = await supabase.storage
-                .from('client-documents')
-                .upload(fileName, file)
-
-            if (uploadError) throw uploadError
-
-            // 2. Add Database Record
-            await addClientDocumentRecord({
-                client_id: clientId,
-                name: file.name,
-                file_path: fileName,
-                size: file.size,
-                type: file.type || 'application/octet-stream',
-                project_id: projectId || undefined
-            })
+            // Upload via server action (handles storage + database)
+            await uploadClientDocument(formData)
 
             toast.success(t.documents.upload.success)
             setOpen(false)
@@ -83,12 +85,14 @@ export function ClientUploadDialog({ clientId, projects }: ClientUploadDialogPro
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {t.documents.upload.button}
-                </Button>
-            </DialogTrigger>
+            {!externalTrigger && (
+                <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2" aria-label={t.documents.upload.button}>
+                        <Upload className="h-4 w-4" />
+                        <span className="hidden sm:inline">{t.documents.upload.button}</span>
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>{t.documents.upload.title}</DialogTitle>
@@ -162,4 +166,86 @@ export function ClientUploadDialog({ clientId, projects }: ClientUploadDialogPro
             </DialogContent>
         </Dialog>
     )
+})
+
+/** On small devices: sticky FAB bottom-right (same as requests). On md+: inline outline button (Nova Pasta style). */
+export function DocumentsUploadWithFab({ clientId, projects, currentFolderId }: { 
+    clientId: string; 
+    projects: { id: string; name: string }[];
+    currentFolderId?: string | null;
+}) {
+    const { t } = useLanguage()
+    const dialogRef = useRef<ClientUploadDialogRef>(null)
+
+    return (
+        <>
+            {/* Desktop: outline button same style as Nova Pasta */}
+            <div className="hidden md:block shrink-0">
+                <ClientUploadDialog clientId={clientId} projects={projects} currentFolderId={currentFolderId} />
+            </div>
+            {/* Mobile: sticky FAB bottom-right, same style as requests button */}
+            <Button
+                size="icon"
+                className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-2xl shadow-lg shadow-primary/25 md:hidden"
+                aria-label={t.documents.upload.button}
+                onClick={() => dialogRef.current?.open()}
+            >
+                <Upload className="h-6 w-6" />
+            </Button>
+            <ClientUploadDialog ref={dialogRef} clientId={clientId} projects={projects} currentFolderId={currentFolderId} externalTrigger />
+        </>
+    )
+}
+
+/** Desktop: outline buttons (Nova Pasta style). Mobile: two sticky FABs side by side (Create folder + Upload). */
+export function DocumentsActionsWithFab({
+    clientId,
+    projects,
+    currentFolderId,
+}: {
+    clientId: string;
+    projects: { id: string; name: string }[];
+    currentFolderId?: string | null;
+}) {
+    const { t } = useLanguage();
+    const folderDialogRef = useRef<CreateFolderDialogRef>(null);
+    const uploadDialogRef = useRef<ClientUploadDialogRef>(null);
+
+    return (
+        <>
+            {/* Desktop: outline buttons, same style as Nova Pasta */}
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => folderDialogRef.current?.open()} aria-label={t.documents.newFolder || "New Folder"}>
+                    <FolderPlus className="h-4 w-4" />
+                    <span>{t.documents.newFolder || "New Folder"}</span>
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => uploadDialogRef.current?.open()} aria-label={t.documents.upload.button}>
+                    <Upload className="h-4 w-4" />
+                    <span>{t.documents.upload.button}</span>
+                </Button>
+            </div>
+            {/* Mobile: two sticky FABs side by side (same style as requests button) */}
+            <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 md:hidden">
+                <Button
+                    size="icon"
+                    className="h-14 w-14 rounded-2xl shadow-lg shadow-primary/25"
+                    aria-label={t.documents.newFolder || "New Folder"}
+                    onClick={() => folderDialogRef.current?.open()}
+                >
+                    <FolderPlus className="h-6 w-6" />
+                </Button>
+                <Button
+                    size="icon"
+                    className="h-14 w-14 rounded-2xl shadow-lg shadow-primary/25"
+                    aria-label={t.documents.upload.button}
+                    onClick={() => uploadDialogRef.current?.open()}
+                >
+                    <Upload className="h-6 w-6" />
+                </Button>
+            </div>
+            {/* Single dialog instances, opened via ref */}
+            <CreateFolderDialog ref={folderDialogRef} clientId={clientId} parentId={currentFolderId} externalTrigger />
+            <ClientUploadDialog ref={uploadDialogRef} clientId={clientId} projects={projects} currentFolderId={currentFolderId} externalTrigger />
+        </>
+    );
 }
