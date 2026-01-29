@@ -46,20 +46,26 @@ export function ClientMobileNav({ links }: ClientMobileNavProps) {
     const overlay = (
         <div
             className={cn(
-                'fixed inset-0 bg-slate-950 transition-all duration-300',
-                open ? 'opacity-100 visible' : 'opacity-0 invisible'
+                'fixed inset-0 bg-slate-950 transition-[opacity,visibility] duration-300 ease-out',
+                open ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
             )}
             style={{ zIndex: 99999 }}
             aria-hidden={!open}
         >
-            <div className="flex h-full w-full flex-col bg-slate-950">
+            {/* Content panel: slides up and fades in */}
+            <div
+                className={cn(
+                    'flex h-full w-full flex-col bg-slate-950 transition-[transform,opacity] duration-300 ease-out',
+                    open ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                )}
+            >
                 {/* Top bar with close button */}
                 <div className="flex h-14 items-center justify-between border-b border-slate-800 px-4 shrink-0 bg-slate-950">
                     <span className="text-sm font-medium text-slate-400">Menu</span>
                     <button
                         type="button"
                         onClick={close}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-slate-800 transition-colors"
+                        className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-slate-800 transition-colors active:scale-95"
                         aria-label="Close menu"
                     >
                         <X className="h-6 w-6 text-slate-50" />
@@ -67,7 +73,13 @@ export function ClientMobileNav({ links }: ClientMobileNavProps) {
                 </div>
 
                 {/* Brand: neon-style lopes2tech text above menu items */}
-                <div className="flex justify-center pt-6 pb-2 shrink-0 bg-slate-950">
+                <div
+                    className={cn(
+                        'flex justify-center pt-6 pb-2 shrink-0 bg-slate-950 transition-[transform,opacity] duration-300 ease-out',
+                        open ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                    )}
+                    style={{ transitionDelay: open ? '50ms' : '0ms' }}
+                >
                     <span
                         className="text-3xl font-bold tracking-tight select-none"
                         style={{ fontFamily: 'system-ui, sans-serif' }}
@@ -99,24 +111,30 @@ export function ClientMobileNav({ links }: ClientMobileNavProps) {
                     </span>
                 </div>
 
-                {/* Centered grid: 3 per row with icon + name - fills remaining space with bg */}
+                {/* Centered grid: 3 per row with icon + name - staggered appear */}
                 <div className="flex-1 flex items-center justify-center p-4 bg-slate-950">
                     <nav className="grid grid-cols-3 gap-4 w-full max-w-md">
-                        {links.map((link) => {
+                        {links.map((link, index) => {
                             const isActive =
                                 pathname === link.href || pathname.startsWith(link.href + '/');
                             const Icon = link.icon;
+                            const delay = open ? 80 + index * 45 : 0;
                             return (
                                 <Link
                                     key={link.href}
                                     href={link.href}
                                     onClick={close}
                                     className={cn(
-                                        'flex flex-col items-center justify-center gap-2 rounded-xl p-4 transition-colors min-h-[96px] bg-slate-900 text-slate-50',
+                                        'flex flex-col items-center justify-center gap-2 rounded-xl p-4 transition-[transform,opacity,background-color] duration-300 ease-out min-h-[96px] bg-slate-900 text-slate-50',
                                         isActive
                                             ? 'ring-2 ring-primary text-primary'
-                                            : 'hover:bg-slate-800'
+                                            : 'hover:bg-slate-800 active:scale-[0.98]'
                                     )}
+                                    style={{
+                                        opacity: open ? 1 : 0,
+                                        transform: open ? 'translateY(0)' : 'translateY(12px)',
+                                        transitionDelay: `${delay}ms`,
+                                    }}
                                 >
                                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
                                         <Icon className="h-6 w-6" />
