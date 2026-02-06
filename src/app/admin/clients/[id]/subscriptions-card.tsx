@@ -73,7 +73,7 @@ export function SubscriptionsCard({ clientId, clientName, clientEmail, subscript
         if (!subscription) return []
         
         // Filter out refunded invoices
-        let filteredInvoices = subscriptionInvoices.filter(inv => {
+        const filteredInvoices = subscriptionInvoices.filter(inv => {
             // If invoice has a payment intent ID, check if it was refunded
             if (inv.stripe_payment_intent_id && refundStatuses[inv.stripe_payment_intent_id]) {
                 return false; // Filter out refunded payments

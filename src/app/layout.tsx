@@ -119,7 +119,7 @@ export default async function RootLayout({
                   ],
                   "contactPoint": {
                     "@type": "ContactPoint",
-                    "telephone": "+41-XX-XXX-XX-XX",
+                    "telephone": "+41-78-798-95-33",
                     "contactType": "customer service",
                     "areaServed": "CH",
                     "availableLanguage": ["English", "German", "Portuguese"]

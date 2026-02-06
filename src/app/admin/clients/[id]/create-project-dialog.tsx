@@ -317,7 +317,7 @@ export function CreateProjectDialog({
                                     </div>
                                 ) : (
                                     <div className="text-center py-8 text-muted-foreground">
-                                        No services found matching "{searchQuery}".
+                                        No services found matching &quot;{searchQuery}&quot;.
                                     </div>
                                 )}
                             </div>

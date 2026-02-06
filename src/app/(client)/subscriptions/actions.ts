@@ -58,7 +58,7 @@ export async function createClientSubscriptionCheckout(
             const billingType = subscription.services?.billing_type || 'monthly';
             
             // Calculate next occurrence of start_date
-            let nextAnchor = new Date(startDate);
+            const nextAnchor = new Date(startDate);
             
             if (billingType === 'monthly') {
                 // Find next month with same day

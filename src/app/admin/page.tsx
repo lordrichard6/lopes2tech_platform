@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
 
     // 3. Fetch User Profiles for the logs (Manual Join)
     const userIds = Array.from(new Set(logs?.map(l => l.user_id).filter(Boolean) || []));
-    let profilesMap: Record<string, any> = {};
+    const profilesMap: Record<string, any> = {};
 
     if (userIds.length > 0) {
         const { data: profiles } = await supabase

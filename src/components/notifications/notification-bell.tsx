@@ -79,7 +79,7 @@ export function NotificationBell() {
         };
 
         fetchNotifications();
-    }, [supabase]); // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [supabase]);  
 
     const handleMarkRead = async (id: string, link: string | null) => {
         // Optimistic update

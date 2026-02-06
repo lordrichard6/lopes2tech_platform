@@ -30,7 +30,7 @@ export default async function ActivityPage() {
 
     // 2. Fetch User Profiles (profiles has no email column)
     const userIds = Array.from(new Set(logs?.map(l => l.user_id).filter(Boolean) || []));
-    let profilesMap: Record<string, any> = {};
+    const profilesMap: Record<string, any> = {};
 
     if (userIds.length > 0) {
         const { data: profiles } = await supabase

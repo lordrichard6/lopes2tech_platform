@@ -573,7 +573,7 @@ export function WelcomePDFDocument({ data }: { data: WelcomeData }) {
                             <Text style={styles.contactRole}>{t.contactRole}</Text>
                             <View style={styles.contactDetails}>
                                 <Text style={styles.contactDetail}>{t.contactEmail}: paulo@lopes2tech.ch</Text>
-                                <Text style={styles.contactDetail}>{t.contactPhone}: +41 76 XXX XX XX</Text>
+                                <Text style={styles.contactDetail}>{t.contactPhone}: +41 78 798 95 33</Text>
                                 <Text style={[styles.contactDetail, { marginTop: 5, color: '#64748b' }]}>{t.contactResponse}</Text>
                             </View>
                         </View>
