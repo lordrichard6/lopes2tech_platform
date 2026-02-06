@@ -17,7 +17,7 @@ import { CredentialsCard } from "./credentials-card";
 import { NotesCard } from "./notes-card";
 import { PortalAccessCard } from "./portal-access-card";
 import { CreateProjectDialog } from "./create-project-dialog";
-import { CreateOfferDialog } from "./create-offer-dialog";
+import { CreateOfferDialog } from "@/components/admin/offers/create-offer-dialog";
 import { CreateContractDialog } from "./create-contract-dialog";
 import { CreateWelcomeDialog } from "./create-welcome-dialog";
 import { CreateHandoverDialog } from "./create-handover-dialog";
